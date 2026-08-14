@@ -65,6 +65,7 @@ import "./components/ImpeccableStructuralLegacy.css";
 import "./components/DorinhaEditorialCompactV6.css";
 import "./pages/HomeVercelGuidelines2026.css";
 import "./pages/HomeRebuildAllSkills2026.css";
+import "./styles/TotalTheme2026.css";
 
 export default function App() {
   return (

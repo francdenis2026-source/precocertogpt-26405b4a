@@ -1,7 +1,10 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+
+const projectRoot = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -12,9 +15,9 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
-        dorinha: resolve(__dirname, "autora/dorinha-barroso/index.html"),
-        dorinhaShort: resolve(__dirname, "dorinha-barroso/index.html"),
+        main: resolve(projectRoot, "index.html"),
+        dorinha: resolve(projectRoot, "autora/dorinha-barroso/index.html"),
+        dorinhaShort: resolve(projectRoot, "dorinha-barroso/index.html"),
       },
     },
   },

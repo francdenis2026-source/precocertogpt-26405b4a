@@ -1,14 +1,11 @@
-import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   ArrowRight,
   BadgeCheck,
-  BadgeDollarSign,
+  BarChart3,
   BookOpen,
-  CheckCircle2,
+  Check,
   ChevronRight,
   Clock3,
   HeartPulse,
@@ -17,17 +14,15 @@ import {
   Moon,
   PackageSearch,
   Search,
+  ShieldCheck,
   ShoppingBasket,
-  ShoppingCart,
-  Smartphone,
   Sparkles,
   Store,
   Sun,
   Tag,
-  Utensils,
-  IceCream,
-  Pizza,
+  TrendingDown,
   X,
+  Zap,
 } from "lucide-react";
 import { buildCatalog, type CatalogPayload, type Product, verifiedDatasetMetrics } from "../data/catalog";
 import { fetchCatalog } from "../data/remoteCatalog";
@@ -35,24 +30,25 @@ import { resolveProductImage } from "../data/productImageResolver";
 import { suggestProducts } from "../lib/productSearch";
 import "./HomePremium.css";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+type Theme = "light" | "dark";
 
+const initialCatalog = buildCatalog();
 const popularSearches = ["Arroz", "Café", "Leite", "Carne", "Limpeza"];
 const categories = [
-  { name: "Mercados", description: "Itens do dia a dia", icon: ShoppingBasket, query: "mercado" },
-  { name: "Açougue", description: "Carnes e cortes", icon: Tag, query: "carne" },
-  { name: "Farmácias", description: "Saúde e cuidados", icon: HeartPulse, href: "/farmacias" },
-  { name: "Livros", description: "Autores de Feijó", icon: BookOpen, href: "/dorinha-barroso" },
-];
+  { name: "Mercados", description: "Cesta básica e dia a dia", icon: ShoppingBasket, query: "mercado", tone: "blue" },
+  { name: "Açougues", description: "Carnes e cortes", icon: Tag, query: "carne", tone: "orange" },
+  { name: "Farmácias", description: "Saúde e cuidados", icon: HeartPulse, href: "/farmacias", tone: "pink" },
+  { name: "Livros locais", description: "Autores de Feijó", icon: BookOpen, href: "/dorinha-barroso", tone: "violet" },
+] as const;
 
-type Theme = "light" | "dark";
-const initialCatalog = buildCatalog();
-const money = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+const money = (value: number) => new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+}).format(value);
+
 const readTheme = (): Theme => {
   if (typeof window === "undefined") return "light";
-  const saved = window.localStorage.getItem("theme");
-  if (saved === "light" || saved === "dark") return saved;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return window.localStorage.getItem("theme") === "dark" ? "dark" : "light";
 };
 
 function bestOffer(product: Product) {
@@ -71,20 +67,23 @@ function bestOffer(product: Product) {
 
 export function HomePremium() {
   const navigate = useNavigate();
+  const searchAreaRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogTriggerRef = useRef<HTMLElement | null>(null);
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [catalog, setCatalog] = useState<CatalogPayload>({ products: [], stores: [], metrics: verifiedDatasetMetrics, updatedAt: new Date().toISOString() });
-  const [catalogLoading, setCatalogLoading] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
   const [activeResult, setActiveResult] = useState(-1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [theme, setTheme] = useState<Theme>(readTheme);
-  const [headerScrolled, setHeaderScrolled] = useState(false);
-  const searchAreaRef = useRef<HTMLDivElement>(null);
-  const homeRef = useRef<HTMLDivElement>(null);
-  const dialogRef = useRef<HTMLElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
-  const dialogTriggerRef = useRef<HTMLElement | null>(null);
+  const [catalog, setCatalog] = useState<CatalogPayload>({
+    products: initialCatalog.products,
+    stores: initialCatalog.stores,
+    metrics: verifiedDatasetMetrics,
+    updatedAt: initialCatalog.updatedAt,
+  });
+  const [catalogLoading, setCatalogLoading] = useState(true);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -93,67 +92,11 @@ export function HomePremium() {
   }, [theme]);
 
   useEffect(() => {
-    let frame = 0;
-    const updateHeader = () => {
-      frame = 0;
-      const nextScrolled = window.scrollY > 16;
-      setHeaderScrolled((current) => current === nextScrolled ? current : nextScrolled);
-    };
-    const handleScroll = () => {
-      if (!frame) frame = window.requestAnimationFrame(updateHeader);
-    };
-
-    updateHeader();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  useGSAP(() => {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduceMotion) return;
-
-    const intro = gsap.timeline({ defaults: { ease: "power4.out" } });
-    intro
-      .fromTo(".pc-hero-copy > :is(.pc-kicker, h1, p)", { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: .62, stagger: .06 })
-      .fromTo(".pc-search-area", { y: 14, opacity: 0, clipPath: "inset(0 0 18% 0 round 13px)" }, { y: 0, opacity: 1, clipPath: "inset(0 0 0% 0 round 13px)", duration: .52 }, "-=.34")
-      .fromTo(".pc-quick", { opacity: 0 }, { opacity: 1, duration: .28 }, "-=.2");
-
-    gsap.utils.toArray<HTMLElement>(".pc-product-card").forEach((card, index) => {
-      // Usamos uma chave de animação única baseada no ID do produto para evitar problemas de reutilização
-      const productId = card.getAttribute("data-product-id");
-      gsap.fromTo(card,
-        { y: 26, opacity: .55, scale: .975 },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: .55,
-          delay: Math.min(index * .045, .18),
-          ease: "power4.out",
-          scrollTrigger: { trigger: card, start: "top 92%", once: true },
-        },
-      );
-    });
-  }, { scope: homeRef });
-
-  useEffect(() => {
     let active = true;
-    setCatalogLoading(true);
     fetchCatalog()
-      .then((result) => { 
-        if (active) {
-          setCatalog(result);
-        }
-      })
-      .catch(err => {
-        console.error("Failed to fetch catalog:", err);
-      })
-      .finally(() => { 
-        if (active) setCatalogLoading(false); 
-      });
+      .then((result) => { if (active) setCatalog(result); })
+      .catch(() => undefined)
+      .finally(() => { if (active) setCatalogLoading(false); });
     return () => { active = false; };
   }, []);
 
@@ -173,20 +116,29 @@ export function HomePremium() {
     dialogTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
+    window.setTimeout(() => closeRef.current?.focus(), 0);
+
     const onKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === "Escape") {
         setSelectedProduct(null);
         return;
       }
       if (event.key !== "Tab") return;
-      const focusable = [...(dialogRef.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? [])];
+      const focusable = [...(dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ) ?? [])];
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
+
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
@@ -200,67 +152,20 @@ export function HomePremium() {
     return suggestProducts(catalog.products, query, 6).filter((product) => product.minPrice > 0);
   }, [catalog.products, query]);
 
-  const opportunities = useMemo(() => {
-    // We use a fixed sort here to avoid flickering on re-renders, 
-    // but the initial state might differ slightly from the fetched state.
-    return catalog.products
-      .filter((product) => product.minPrice > 0)
-      .sort((a, b) => (b.maxPrice - b.minPrice) - (a.maxPrice - a.minPrice))
-      .slice(0, 5);
-  }, [catalog.products]);
+  const opportunities = useMemo(() => catalog.products
+    .filter((product) => product.minPrice > 0)
+    .sort((a, b) => (b.maxPrice - b.minPrice) - (a.maxPrice - a.minPrice))
+    .slice(0, 6), [catalog.products]);
 
-  const [comparisonIndex, setComparisonIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  const comparableProducts = useMemo(() => {
-    return catalog.products
-      .filter((p) => p.minPrice > 0 && (p.offers?.length ?? 0) > 1)
-      .sort((a, b) => (b.maxPrice - b.minPrice) - (a.maxPrice - a.minPrice));
-  }, [catalog.products]);
-
-  useEffect(() => {
-    if (comparableProducts.length <= 1) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reducedMotion.matches) return;
-    
-    // Create a pool of indices and shuffle them to avoid repetition
-    const indicesPool = Array.from({ length: Math.min(comparableProducts.length, 24) }, (_, i) => i);
-    let currentIndex = 0;
-    
-    const shuffle = (array: number[]) => {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    };
-    
-    shuffle(indicesPool);
-
-    let transitionTimer: ReturnType<typeof setTimeout> | undefined;
-    const interval = setInterval(() => {
-      setIsTransitioning(true);
-      transitionTimer = setTimeout(() => {
-        currentIndex = (currentIndex + 1) % indicesPool.length;
-        if (currentIndex === 0) shuffle(indicesPool);
-        
-        setComparisonIndex(indicesPool[currentIndex]);
-        setIsTransitioning(false);
-      }, 240);
-    }, 60000); // 60 seconds interval as requested
-    
-    return () => {
-      clearInterval(interval);
-      if (transitionTimer) clearTimeout(transitionTimer);
-    };
-  }, [comparableProducts.length]);
-
-  const comparisonProduct = comparableProducts[comparisonIndex] ?? opportunities[0] ?? catalog.products[0];
+  const comparisonProduct = opportunities[0] ?? catalog.products[0];
   const comparisonOffers = useMemo(() => comparisonProduct
-    ? [...(comparisonProduct.offers ?? [])].filter((offer) => offer.value > 0).sort((a, b) => a.value - b.value).slice(0, 3)
+    ? [...(comparisonProduct.offers ?? [])]
+      .filter((offer) => offer.value > 0)
+      .sort((a, b) => a.value - b.value)
+      .slice(0, 4)
     : [], [comparisonProduct]);
-
   const stores = useMemo(() => catalog.stores.filter((store) => store.products > 0).slice(0, 6), [catalog.stores]);
+  const headlineSaving = comparisonProduct ? Math.max(0, comparisonProduct.maxPrice - comparisonProduct.minPrice) : 0;
 
   const search = (term: string) => {
     const normalized = term.trim();
@@ -279,7 +184,11 @@ export function HomePremium() {
   };
 
   const handleSearchKeys = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Escape") { setSearchOpen(false); setActiveResult(-1); return; }
+    if (event.key === "Escape") {
+      setSearchOpen(false);
+      setActiveResult(-1);
+      return;
+    }
     if (!searchOpen || !suggestions.length) return;
     if (event.key === "ArrowDown") {
       event.preventDefault();
@@ -295,401 +204,272 @@ export function HomePremium() {
   };
 
   return (
-    <div className="pc-home" ref={homeRef}>
-      <a className="pc-skip" href="#pc-content">Ir para o conteúdo</a>
+    <div className="pcx-home">
+      <a className="pcx-skip" href="#conteudo">Ir para o conteúdo</a>
 
-      <header className={`pc-header${headerScrolled ? " is-scrolled" : ""}`}>
-        <div className="pc-shell pc-header-inner">
-          <Link className="pc-logo" to="/" aria-label="PreçoCerto — página inicial">
-            <img src="/logo-preco-certo-inversa.svg" alt="PreçoCerto" />
+      <header className="pcx-header">
+        <div className="pcx-shell pcx-header__inner">
+          <Link className="pcx-brand" to="/" aria-label="PreçoCerto — página inicial">
+            <span className="pcx-brand__mark"><TrendingDown aria-hidden="true" /></span>
+            <span>preço<strong>certo</strong></span>
           </Link>
-          <nav className="pc-nav" aria-label="Navegação principal">
+          <nav className="pcx-nav" aria-label="Navegação principal">
             <Link to="/buscar">Comparar</Link>
-            <Link to="/estabelecimentos">Estabelecimentos</Link>
+            <Link to="/estabelecimentos">Lojas locais</Link>
             <Link to="/farmacias">Farmácias</Link>
             <Link to="/colaborar">Colaborar</Link>
           </nav>
-          <div className="pc-header-actions">
-            <button className="pc-icon-button" type="button" onClick={() => setTheme((value) => value === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}>
+          <div className="pcx-header__actions">
+            <button className="pcx-icon-button" type="button" onClick={() => setTheme((value) => value === "dark" ? "light" : "dark")} aria-label={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}>
               {theme === "dark" ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
             </button>
-            <Link className="pc-merchant" to="/lojista">Sou comerciante <ArrowRight aria-hidden="true" /></Link>
-            <button className="pc-menu-button" type="button" aria-expanded={menuOpen} aria-controls="pc-mobile-menu" aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} onClick={() => setMenuOpen((value) => !value)}>
+            <Link className="pcx-merchant" to="/lojista">Área do lojista <ArrowRight aria-hidden="true" /></Link>
+            <button className="pcx-menu-button" type="button" aria-expanded={menuOpen} aria-controls="pcx-mobile-menu" aria-label={menuOpen ? "Fechar menu" : "Abrir menu"} onClick={() => setMenuOpen((value) => !value)}>
               {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
             </button>
           </div>
         </div>
         {menuOpen && (
-          <nav id="pc-mobile-menu" className="pc-mobile-menu" aria-label="Navegação mobile">
+          <nav id="pcx-mobile-menu" className="pcx-mobile-menu" aria-label="Navegação mobile">
             <Link to="/buscar" onClick={() => setMenuOpen(false)}>Comparar preços</Link>
-            <Link to="/estabelecimentos" onClick={() => setMenuOpen(false)}>Estabelecimentos</Link>
+            <Link to="/estabelecimentos" onClick={() => setMenuOpen(false)}>Lojas locais</Link>
             <Link to="/farmacias" onClick={() => setMenuOpen(false)}>Farmácias</Link>
             <Link to="/colaborar" onClick={() => setMenuOpen(false)}>Colaborar</Link>
-            <Link to="/lojista" onClick={() => setMenuOpen(false)}>Sou comerciante</Link>
+            <Link to="/lojista" onClick={() => setMenuOpen(false)}>Área do lojista</Link>
           </nav>
         )}
       </header>
 
-      <main id="pc-content">
-        <section className="pc-dynamic-ad">
-          <div className="pc-shell">
-            <div className="pc-ad-card">
-              <div className="pc-ad-content">
-                <div className="pc-ad-badge">Marketplace Local</div>
-                <h2>A maior vitrine comercial de Feijó agora é digital.</h2>
-                <p>Encontre tudo o que você precisa, compare preços em tempo real e apoie o comércio da nossa cidade em uma única plataforma.</p>
-                <div className="pc-ad-stats">
-                  <div className="pc-ad-stat">
-                    <strong>+50</strong>
-                    <span>Lojas Parceiras</span>
-                  </div>
-                  <div className="pc-ad-stat">
-                    <strong>100%</strong>
-                    <span>Economia Real</span>
-                  </div>
-                </div>
-                <Link to="/estabelecimentos" className="pc-ad-btn">
-                  Explorar Marketplace <ArrowRight size={18} />
-                </Link>
-              </div>
-              <div className="pc-ad-visual">
-                <div className="pc-ad-floating-icons">
-                  <div className="floating-item item-1"><Store size={24} /></div>
-                  <div className="floating-item item-2"><ShoppingBasket size={24} /></div>
-                  <div className="floating-item item-3"><BadgeDollarSign size={24} /></div>
-                </div>
-                <img src="/mercado-local-profissional.webp" alt="Marketplace Local" />
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        <section className="pc-services-strip">
-          <div className="pc-shell">
-            <div className="pc-services-scroll">
-              <Link to="/buscar?q=conveniencia" className="pc-service-item">
-                <div className="pc-service-icon"><Clock3 size={20} /></div>
-                <span>Conveniência</span>
-              </Link>
-              <Link to="/buscar?q=padaria" className="pc-service-item">
-                <div className="pc-service-icon"><ShoppingBasket size={20} /></div>
-                <span>Padaria</span>
-              </Link>
-              <Link to="/buscar?q=açougue" className="pc-service-item">
-                <div className="pc-service-icon"><Tag size={20} /></div>
-                <span>Açougue</span>
-              </Link>
-              <Link to="/farmacias" className="pc-service-item">
-                <div className="pc-service-icon"><HeartPulse size={20} /></div>
-                <span>Farmácia</span>
-              </Link>
-              <Link to="/estabelecimentos" className="pc-service-item">
-                <div className="pc-service-icon"><Store size={20} /></div>
-                <span>Lojas</span>
-              </Link>
-              <Link to="/buscar?q=mercantil" className="pc-service-item">
-                <div className="pc-service-icon"><ShoppingCart size={20} /></div>
-                <span>Mercantil</span>
-              </Link>
-              <Link to="/buscar?q=frutaria" className="pc-service-item">
-                <div className="pc-service-icon"><Sun size={20} /></div>
-                <span>Frutaria</span>
-              </Link>
-              <Link to="/dorinha-barroso" className="pc-service-item">
-                <div className="pc-service-icon"><BookOpen size={20} /></div>
-                <span>Livraria</span>
-              </Link>
-              <Link to="/buscar?q=papelaria" className="pc-service-item">
-                <div className="pc-service-icon"><Smartphone size={20} /></div>
-                <span>Papelaria</span>
-              </Link>
-              <Link to="/buscar?q=pizzaria" className="pc-service-item">
-                <div className="pc-service-icon"><Pizza size={20} /></div>
-                <span>Pizzaria</span>
-              </Link>
-              <Link to="/buscar?q=lanchonete" className="pc-service-item">
-                <div className="pc-service-icon"><Utensils size={20} /></div>
-                <span>Lanchonete</span>
-              </Link>
-              <Link to="/buscar?q=sorveteria" className="pc-service-item">
-                <div className="pc-service-icon"><IceCream size={20} /></div>
-                <span>Sorveteria</span>
-              </Link>
-            </div>
-          </div>
-        </section>
+      <main id="conteudo">
+        <section className="pcx-hero" aria-labelledby="pcx-title">
+          <div className="pcx-shell pcx-hero__grid">
+            <div className="pcx-hero__copy">
+              <div className="pcx-eyebrow"><Zap aria-hidden="true" /> Inteligência de preços para Feijó</div>
+              <h1 id="pcx-title">Seu dinheiro compra <em>mais</em> quando você compara.</h1>
+              <p>Veja o preço do mesmo produto em diferentes lojas da cidade e escolha onde vale a pena comprar — antes de sair de casa.</p>
 
-
-        <section className="pc-hero" aria-labelledby="pc-title">
-          <div className="pc-shell pc-hero-inner">
-            <div className="pc-hero-copy">
-              <span className="pc-kicker"><MapPin aria-hidden="true" /> Feijó · Acre</span>
-              <h1 id="pc-title">Antes de comprar, encontre o <em>preço certo.</em></h1>
-              <p>Pesquise produtos, compare estabelecimentos locais e escolha a melhor opção para sua compra em poucos segundos.</p>
-              <div className="pc-search-area" ref={searchAreaRef}>
-                <form className="pc-search" role="search" onSubmit={submitSearch}>
-                  <Search aria-hidden="true" />
-                  <label className="sr-only" htmlFor="pc-home-search">Pesquisar produto</label>
-                  <input
-                    id="pc-home-search"
-                    value={query}
-                    placeholder="Busque arroz, café, carne, leite..."
-                    autoComplete="off"
-                    role="combobox"
-                    aria-autocomplete="list"
-                    aria-expanded={searchOpen && query.trim().length >= 2}
-                    aria-controls="pc-search-results"
-                    aria-activedescendant={activeResult >= 0 ? `pc-result-${activeResult}` : undefined}
-                    onFocus={() => setSearchOpen(true)}
-                    onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); setActiveResult(-1); }}
-                    onKeyDown={handleSearchKeys}
-                  />
-                  <button type="submit">Encontrar menor preço <ArrowRight aria-hidden="true" /></button>
+              <div className="pcx-search-area" ref={searchAreaRef}>
+                <form className="pcx-search" role="search" onSubmit={submitSearch}>
+                  <label htmlFor="pcx-search-input">O que você quer comprar?</label>
+                  <div className="pcx-search__control">
+                    <Search aria-hidden="true" />
+                    <input
+                      id="pcx-search-input"
+                      value={query}
+                      onChange={(event) => { setQuery(event.target.value); setSearchOpen(true); setActiveResult(-1); }}
+                      onFocus={() => setSearchOpen(true)}
+                      onKeyDown={handleSearchKeys}
+                      placeholder="Ex.: arroz, café, leite..."
+                      autoComplete="off"
+                      aria-autocomplete="list"
+                      aria-controls="pcx-search-results"
+                      aria-expanded={searchOpen && query.trim().length >= 2}
+                      aria-activedescendant={activeResult >= 0 ? `pcx-result-${activeResult}` : undefined}
+                    />
+                    <button type="submit">Comparar agora <ArrowRight aria-hidden="true" /></button>
+                  </div>
                 </form>
                 {searchOpen && query.trim().length >= 2 && (
-                  <div className="pc-results" id="pc-search-results" role="listbox" aria-label="Sugestões de produtos">
-                    {catalogLoading && !suggestions.length ? (
-                      <div className="pc-result-state" role="status"><PackageSearch aria-hidden="true" /><span><strong>Buscando produtos…</strong><small>Consultando os preços disponíveis.</small></span></div>
-                    ) : suggestions.length ? suggestions.map((product, index) => {
-                      const offer = bestOffer(product);
-                      const image = resolveProductImage(product);
-                      return (
-                        <button id={`pc-result-${index}`} key={String(product.id)} type="button" role="option" aria-selected={activeResult === index} className={`pc-result${activeResult === index ? " is-active" : ""}`} onMouseEnter={() => setActiveResult(index)} onClick={() => { setSelectedProduct(product); setSearchOpen(false); }}>
-                          <span className="pc-result-image">{image ? <img src={image} alt="" /> : <PackageSearch aria-hidden="true" />}</span>
-                          <span className="pc-result-copy"><strong>{product.name}</strong><small>{[product.brand, product.size].filter(Boolean).join(" · ")}</small><em><Store aria-hidden="true" /> {offer.establishment}</em></span>
-                          <span className="pc-result-price"><small>menor preço</small><strong>{money(product.minPrice)}</strong></span>
-                        </button>
-                      );
-                    }) : (
-                      <div className="pc-result-state" role="status"><PackageSearch aria-hidden="true" /><span><strong>Nenhum produto encontrado</strong><small>Tente outro nome, marca ou categoria.</small></span></div>
-                    )}
+                  <div id="pcx-search-results" className="pcx-results" role="listbox" aria-label="Sugestões de produtos">
+                    {suggestions.length ? suggestions.map((product, index) => (
+                      <button
+                        id={`pcx-result-${index}`}
+                        key={`${product.id}-${product.establishmentId}`}
+                        type="button"
+                        role="option"
+                        aria-selected={activeResult === index}
+                        className={activeResult === index ? "is-active" : ""}
+                        onPointerDown={(event) => event.preventDefault()}
+                        onClick={() => { setSelectedProduct(product); setSearchOpen(false); }}
+                      >
+                        <span className="pcx-result__image">
+                          {resolveProductImage(product) ? <img src={resolveProductImage(product)} alt="" /> : <PackageSearch aria-hidden="true" />}
+                        </span>
+                        <span><strong>{product.name}</strong><small>{product.brand} · {product.size}</small></span>
+                        <span className="pcx-result__price"><small>a partir de</small><strong>{money(product.minPrice)}</strong></span>
+                      </button>
+                    )) : <div className="pcx-results__empty"><PackageSearch aria-hidden="true" /><span><strong>Nenhum resultado para “{query}”</strong><small>Tente buscar por arroz, leite ou limpeza.</small></span></div>}
                   </div>
                 )}
+                <div className="pcx-quick" aria-label="Buscas populares">
+                  <span>Mais buscados:</span>
+                  {popularSearches.map((term) => <button key={term} type="button" onClick={() => search(term)}>{term}</button>)}
+                </div>
               </div>
-              <div className="pc-quick" aria-label="Buscas rápidas"><span>Mais buscados:</span>{popularSearches.map((item) => <button key={item} type="button" onClick={() => search(item)}>{item}</button>)}</div>
             </div>
-            <aside className="pc-hero-side" aria-label="Recursos principais">
-              <div><BadgeDollarSign aria-hidden="true" /><span><strong>Compare preços reais</strong><small>Veja a diferença entre estabelecimentos.</small></span></div>
-              <div><ShoppingCart aria-hidden="true" /><span><strong>Monte sua cesta</strong><small>Planeje sua compra com mais clareza.</small></span></div>
-              <div><Store aria-hidden="true" /><span><strong>Descubra lojas locais</strong><small>Acesse catálogos e ofertas disponíveis.</small></span></div>
+
+            <aside className="pcx-radar" aria-label="Exemplo de comparação em tempo real">
+              <div className="pcx-radar__top">
+                <span><Sparkles aria-hidden="true" /> Radar de economia</span>
+                <span className="pcx-live"><i /> Atualizado</span>
+              </div>
+              {comparisonProduct ? (
+                <>
+                  <div className="pcx-radar__product">
+                    <div className="pcx-radar__image">
+                      {resolveProductImage(comparisonProduct) ? <img src={resolveProductImage(comparisonProduct)} alt={comparisonProduct.name} /> : <ShoppingBasket aria-hidden="true" />}
+                    </div>
+                    <div><small>Melhor oportunidade agora</small><h2>{comparisonProduct.name}</h2><p>{comparisonProduct.brand} · {comparisonProduct.size}</p></div>
+                  </div>
+                  <div className="pcx-radar__prices">
+                    <div><span>Menor preço</span><strong>{money(comparisonProduct.minPrice)}</strong></div>
+                    <div><span>Maior preço</span><strong>{money(comparisonProduct.maxPrice)}</strong></div>
+                  </div>
+                  <div className="pcx-radar__saving"><TrendingDown aria-hidden="true" /><span>Você pode economizar</span><strong>{money(headlineSaving)}</strong></div>
+                  <button type="button" onClick={() => setSelectedProduct(comparisonProduct)}>Ver comparação completa <ChevronRight aria-hidden="true" /></button>
+                </>
+              ) : <div className="pcx-radar__loading">Carregando comparação...</div>}
             </aside>
           </div>
         </section>
 
-        <section className="pc-action-strip" aria-label="Atalhos da plataforma">
-          <div className="pc-shell pc-action-strip-inner">
-            <Link to="/buscar"><Search aria-hidden="true" /><span><strong>Comparar produto</strong><small>Pesquise e veja onde está mais barato</small></span><ChevronRight aria-hidden="true" /></Link>
-            <Link to="/cesta-basica"><ShoppingCart aria-hidden="true" /><span><strong>Cesta inteligente</strong><small>Organize os itens que pretende comprar</small></span><ChevronRight aria-hidden="true" /></Link>
-            <Link to="/estabelecimentos"><Store aria-hidden="true" /><span><strong>Explorar lojas</strong><small>Conheça os catálogos de Feijó</small></span><ChevronRight aria-hidden="true" /></Link>
+        <section className="pcx-proof" aria-label="Números da plataforma">
+          <div className="pcx-shell pcx-proof__grid">
+            <div><strong>{catalogLoading ? "—" : catalog.metrics.products.toLocaleString("pt-BR")}</strong><span>produtos monitorados</span></div>
+            <div><strong>{catalogLoading ? "—" : catalog.metrics.prices.toLocaleString("pt-BR")}</strong><span>preços comparados</span></div>
+            <div><strong>{catalogLoading ? "—" : catalog.metrics.stores.toLocaleString("pt-BR")}</strong><span>estabelecimentos locais</span></div>
+            <div className="pcx-proof__trust"><ShieldCheck aria-hidden="true" /><span><strong>Dados transparentes</strong><small>Você decide onde comprar</small></span></div>
           </div>
         </section>
 
-        <section className="pc-section pc-shell pc-categories" aria-labelledby="pc-categories-title">
-          <div className="pc-heading"><span>Explore por categoria</span><h2 id="pc-categories-title">Encontre mais rápido o que precisa.</h2></div>
-          <div className="pc-category-row">
-            {categories.map(({ name, description, icon: Icon, href, query: categoryQuery }) => {
-              const content = <><span className="pc-category-icon"><Icon aria-hidden="true" /></span><span><strong>{name}</strong><small>{description}</small></span><ChevronRight aria-hidden="true" /></>;
-              return href ? <Link key={name} className="pc-category" to={href}>{content}</Link> : <button key={name} className="pc-category" type="button" onClick={() => search(categoryQuery ?? name)}>{content}</button>;
+        <section className="pcx-section pcx-shell" aria-labelledby="categorias-title">
+          <div className="pcx-section__head">
+            <div><span className="pcx-kicker">Explore a cidade</span><h2 id="categorias-title">Tudo o que você precisa, mais perto.</h2></div>
+            <Link to="/buscar">Ver todas as categorias <ArrowRight aria-hidden="true" /></Link>
+          </div>
+          <div className="pcx-categories">
+            {categories.map((category) => {
+              const Icon = category.icon;
+              const content = <><span className={`pcx-category__icon is-${category.tone}`}><Icon aria-hidden="true" /></span><span><strong>{category.name}</strong><small>{category.description}</small></span><ChevronRight aria-hidden="true" /></>;
+              return "href" in category
+                ? <Link key={category.name} className="pcx-category" to={category.href}>{content}</Link>
+                : <button key={category.name} className="pcx-category" type="button" onClick={() => search(category.query)}>{content}</button>;
             })}
           </div>
         </section>
 
-        <section className="pc-section pc-shell pc-opportunities" aria-labelledby="pc-opportunities-title">
-          <div className="pc-heading pc-heading-row"><div><span>Seleção rápida</span><h2 id="pc-opportunities-title">Poucos destaques. Boas diferenças de preço.</h2><p>Uma amostra objetiva do catálogo para você comparar sem excesso de informação.</p></div><Link to="/buscar">Explorar catálogo <ArrowRight aria-hidden="true" /></Link></div>
-          <div className="pc-product-grid">
-            {opportunities.map((product, index) => {
-              const offer = bestOffer(product);
-              const image = resolveProductImage(product);
-              const saving = Math.max(0, product.maxPrice - product.minPrice);
-              const featured = index === 0;
-              return (
-                <article className={`pc-product-card${featured ? " is-featured" : ""}`} key={`${String(product.id)}-${index}`} data-product-id={String(product.id)}>
-                  <button className="pc-product-open" type="button" onClick={() => setSelectedProduct(product)} aria-label={`Abrir comparação de ${product.name}`}>
-                    <span className="pc-product-media">
-                      {featured && <span className="pc-product-featured-label"><Sparkles aria-hidden="true" /> Maior economia da seleção</span>}
-                      {image ? <img src={image} alt={product.name} loading="lazy" /> : <PackageSearch aria-hidden="true" />}
+        <section className="pcx-section pcx-opportunities" aria-labelledby="oportunidades-title">
+          <div className="pcx-shell">
+            <div className="pcx-section__head">
+              <div><span className="pcx-kicker">Diferenças que importam</span><h2 id="oportunidades-title">Onde seu dinheiro rende mais hoje.</h2><p>Produtos com maior variação de preço entre as lojas.</p></div>
+              <Link to="/buscar">Comparar mais produtos <ArrowRight aria-hidden="true" /></Link>
+            </div>
+            <div className="pcx-products">
+              {opportunities.map((product, index) => {
+                const saving = Math.max(0, product.maxPrice - product.minPrice);
+                return (
+                  <button key={`${product.id}-${index}`} className="pcx-product" type="button" onClick={() => setSelectedProduct(product)}>
+                    <span className="pcx-product__badge">Economize {money(saving)}</span>
+                    <span className="pcx-product__media">
+                      {resolveProductImage(product) ? <img src={resolveProductImage(product)} alt={product.name} loading={index > 2 ? "lazy" : "eager"} /> : <PackageSearch aria-hidden="true" />}
                     </span>
-                    <span className="pc-product-info"><small>{[product.brand, product.size].filter(Boolean).join(" · ")}</small><strong>{product.name}</strong></span>
+                    <span className="pcx-product__body">
+                      <small>{product.category}</small><strong>{product.name}</strong><span>{product.brand} · {product.size}</span>
+                      <span className="pcx-product__price"><small>a partir de</small><b>{money(product.minPrice)}</b></span>
+                      <span className="pcx-product__store"><MapPin aria-hidden="true" /> {bestOffer(product).establishment}</span>
+                    </span>
                   </button>
-                  <div className="pc-price-line"><span><small>Menor preço</small><strong>{money(product.minPrice)}</strong></span>{saving > 0 && <em>diferença de {money(saving)}</em>}</div>
-                  <div className="pc-store-line"><Store aria-hidden="true" /><span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span></div>
-                  <button className="pc-compare-button" type="button" onClick={() => setSelectedProduct(product)} aria-label={`Comparar preços de ${product.name}`}>Comparar <ArrowRight aria-hidden="true" /></button>
-                </article>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </section>
 
         {comparisonProduct && (
-          <section className="pc-compare-section" aria-labelledby="pc-compare-title">
-            <div className="pc-shell pc-compare-layout">
-              <div className="pc-compare-copy">
-                <span className="pc-kicker"><BadgeCheck aria-hidden="true" /> Comparação prática</span>
-                <h2 id="pc-compare-title">A melhor escolha aparece lado a lado.</h2>
-                <p>Compare o mesmo produto em diferentes estabelecimentos sem precisar abrir várias telas.</p>
-                <button type="button" onClick={() => setSelectedProduct(comparisonProduct)}>Abrir comparação completa <ArrowRight aria-hidden="true" /></button>
+          <section className="pcx-compare" aria-labelledby="comparacao-title">
+            <div className="pcx-shell pcx-compare__grid">
+              <div className="pcx-compare__copy">
+                <span className="pcx-kicker">Comparação sem enrolação</span>
+                <h2 id="comparacao-title">O mesmo produto.<br />Preços bem diferentes.</h2>
+                <p>O PreçoCerto organiza os valores encontrados para você enxergar rapidamente a melhor escolha.</p>
+                <ul><li><Check aria-hidden="true" /> Preços lado a lado</li><li><Check aria-hidden="true" /> Loja e bairro identificados</li><li><Check aria-hidden="true" /> Atualização transparente</li></ul>
+                <Link to={`/buscar?q=${encodeURIComponent(comparisonProduct.name)}`}>Abrir comparação <ArrowRight aria-hidden="true" /></Link>
               </div>
-              <button 
-                type="button"
-                className={`pc-compare-product${isTransitioning ? " is-exiting" : " is-entering"}`}
-                onClick={() => setSelectedProduct(comparisonProduct)}
-                aria-label={`Ver detalhes de ${comparisonProduct.name}`}
-              >
-                <div className="pc-compare-product-head">
-                  <span className={`pc-compare-product-image ${resolveProductImage(comparisonProduct)?.endsWith('.png') ? 'is-transparent' : ''}`}>
-                    {resolveProductImage(comparisonProduct) ? (
-                      <img src={resolveProductImage(comparisonProduct)} alt={comparisonProduct.name} loading="lazy" />
-                    ) : (
-                      <div className="pc-no-image">
-                        <PackageSearch aria-hidden="true" />
-                        <strong>{comparisonProduct.name}</strong>
-                      </div>
-                    )}
-                    <span className="pc-compare-badge"><Sparkles size={10} /> Em destaque</span>
-                  </span>
-                  <div className="pc-compare-product-details">
-                    <small>{[comparisonProduct.brand, comparisonProduct.size].filter(Boolean).join(" · ")}</small>
-                    <strong>{comparisonProduct.name}</strong>
-                  </div>
-                </div>
-                <div className="pc-offer-list">
-                  {comparisonOffers.length > 0 ? (
-                    comparisonOffers.map((offer, idx) => (
-                      <div key={`${comparisonProduct.id}-${offer.establishmentId}`} className={`pc-offer-row ${idx === 0 ? "is-best" : ""}`}>
-                        <span className="pc-offer-rank">{idx + 1}</span>
-                        <span>
-                          <strong>{offer.establishment}</strong>
-                          <small>{offer.neighborhood || "Feijó, AC"}</small>
-                        </span>
-                        {idx === 0 && <em>Melhor preço</em>}
-                        <b>{money(offer.value)}</b>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="pc-offer-row-empty">Carregando ofertas...</div>
-                  )}
-                  {/* Fill empty rows to maintain height if fewer than 3 offers */}
-                  {comparisonOffers.length < 3 && Array.from({ length: 3 - comparisonOffers.length }).map((_, i) => (
-                    <div key={`empty-${i}`} className="pc-offer-row pc-offer-row-placeholder" />
+              <div className="pcx-compare__card">
+                <div className="pcx-compare__product"><BarChart3 aria-hidden="true" /><span><small>Comparando agora</small><strong>{comparisonProduct.name}</strong></span></div>
+                <div className="pcx-offers">
+                  {(comparisonOffers.length ? comparisonOffers : [bestOffer(comparisonProduct)]).map((offer, index) => (
+                    <div key={`${offer.establishmentId}-${index}`} className={index === 0 ? "is-best" : ""}>
+                      <span className="pcx-offer__rank">{index + 1}</span>
+                      <span><strong>{offer.establishment}</strong><small><MapPin aria-hidden="true" /> {offer.neighborhood}</small></span>
+                      {index === 0 && <em><BadgeCheck aria-hidden="true" /> Melhor preço</em>}
+                      <b>{money(offer.value)}</b>
+                    </div>
                   ))}
                 </div>
-              </button>
+                <div className="pcx-compare__footer"><Clock3 aria-hidden="true" /> Preços informados pelas lojas e colaboradores locais.</div>
+              </div>
             </div>
           </section>
         )}
 
-        <section className="pc-section pc-shell pc-stores" aria-labelledby="pc-stores-title">
-          <div className="pc-heading pc-heading-row"><div><span>Comércio local</span><h2 id="pc-stores-title">Estabelecimentos para explorar.</h2></div><Link to="/estabelecimentos">Ver todos <ArrowRight aria-hidden="true" /></Link></div>
-          <div className="pc-store-grid">
+        <section className="pcx-section pcx-shell" aria-labelledby="lojas-title">
+          <div className="pcx-section__head">
+            <div><span className="pcx-kicker">Comércio local conectado</span><h2 id="lojas-title">Boas escolhas começam por perto.</h2></div>
+            <Link to="/estabelecimentos">Conhecer todas as lojas <ArrowRight aria-hidden="true" /></Link>
+          </div>
+          <div className="pcx-stores">
             {stores.map((store) => (
-              <Link className="pc-store-card" to={`/estabelecimento/${store.slug}`} key={String(store.id)} data-store-id={String(store.id)}>
-                <span className="pc-store-avatar" style={{ background: store.color }}><Store aria-hidden="true" /></span>
-                <span><strong>{store.name}</strong><small>{store.neighborhood || "Feijó, AC"}</small><em>{store.products} {store.products === 1 ? "produto" : "produtos"} no catálogo</em></span>
-                <ChevronRight aria-hidden="true" />
+              <Link className="pcx-store" to={`/estabelecimento/${store.slug}`} key={store.id}>
+                <span className="pcx-store__mark" style={{ "--store-color": store.color } as CSSProperties}><Store aria-hidden="true" /></span>
+                <span><strong>{store.name}</strong><small><MapPin aria-hidden="true" /> {store.neighborhood}</small></span>
+                <span className="pcx-store__count">{store.products} itens</span><ChevronRight aria-hidden="true" />
               </Link>
             ))}
           </div>
         </section>
 
-        <section className="pc-basket-section" aria-labelledby="pc-basket-title">
-          <div className="pc-shell pc-basket-layout">
-            <div className="pc-basket-copy">
-              <span className="pc-kicker"><Sparkles aria-hidden="true" /> Planejamento de compra</span>
-              <h2 id="pc-basket-title">Monte a cesta antes de sair de casa.</h2>
-              <p>Junte os produtos que precisa e use o PreçoCerto para pesquisar, comparar e organizar melhor sua compra.</p>
-              <Link to="/cesta-basica">Abrir minha cesta <ArrowRight aria-hidden="true" /></Link>
-            </div>
-            <div className="pc-basket-points" aria-label="Benefícios da cesta">
-              <span><CheckCircle2 aria-hidden="true" /> Organize os itens da compra</span>
-              <span><CheckCircle2 aria-hidden="true" /> Compare antes de decidir</span>
-              <span><CheckCircle2 aria-hidden="true" /> Acesse pelo celular</span>
+        <section className="pcx-steps" aria-labelledby="como-title">
+          <div className="pcx-shell">
+            <div className="pcx-steps__head"><span className="pcx-kicker">Simples de verdade</span><h2 id="como-title">Compare em três passos.</h2></div>
+            <div className="pcx-steps__grid">
+              <div><span>01</span><Search aria-hidden="true" /><h3>Busque o produto</h3><p>Digite o nome, a marca ou a categoria do que precisa.</p></div>
+              <div><span>02</span><BarChart3 aria-hidden="true" /><h3>Compare os preços</h3><p>Veja os valores encontrados nas lojas da cidade.</p></div>
+              <div><span>03</span><MapPin aria-hidden="true" /><h3>Escolha onde comprar</h3><p>Decida considerando preço, bairro e conveniência.</p></div>
             </div>
           </div>
         </section>
 
-        <section className="pc-section pc-shell pc-how" aria-labelledby="pc-how-title">
-          <div className="pc-how-head">
-            <div>
-              <h2 id="pc-how-title">Da busca à melhor escolha, sem complicação.</h2>
-              <p>Em poucos instantes, o PreçoCerto transforma uma pesquisa em uma decisão mais inteligente.</p>
-            </div>
-            <Link to="/buscar">Experimentar agora <ArrowRight aria-hidden="true" /></Link>
-          </div>
-
-          <ol className="pc-how-flow">
-            <li className="pc-how-step pc-how-search-step">
-              <span className="pc-how-number" aria-hidden="true">1</span>
-              <div className="pc-how-icon"><Search aria-hidden="true" /></div>
-              <div className="pc-how-copy"><strong>Pesquise o que precisa</strong><p>Digite o nome do produto para começar.</p></div>
-              <div className="pc-how-demo pc-how-query" aria-hidden="true"><Search /><span>Arroz 5 kg</span><i><ArrowRight /></i></div>
-            </li>
-            <li className="pc-how-step pc-how-compare-step">
-              <span className="pc-how-number" aria-hidden="true">2</span>
-              <div className="pc-how-icon"><BadgeDollarSign aria-hidden="true" /></div>
-              <div className="pc-how-copy"><strong>Compare lado a lado</strong><p>Veja as opções disponíveis em diferentes lojas.</p></div>
-              <div className="pc-how-demo pc-how-bars" aria-hidden="true">
-                <span><i style={{ width: "100%" }} /><small>Loja A</small></span>
-                <span className="is-best"><i style={{ width: "72%" }} /><small>Loja B</small></span>
-                <span><i style={{ width: "88%" }} /><small>Loja C</small></span>
-              </div>
-            </li>
-            <li className="pc-how-step pc-how-choice-step">
-              <span className="pc-how-number" aria-hidden="true">3</span>
-              <div className="pc-how-icon"><CheckCircle2 aria-hidden="true" /></div>
-              <div className="pc-how-copy"><strong>Escolha com confiança</strong><p>A melhor opção ganha destaque para você decidir.</p></div>
-              <div className="pc-how-demo pc-how-result" aria-hidden="true"><span><CheckCircle2 /></span><div><small>Melhor opção</small><strong>Pronto para escolher</strong></div><ArrowRight /></div>
-            </li>
-          </ol>
-        </section>
-
-        <section className="pc-commercial" aria-labelledby="pc-commercial-title">
-          <div className="pc-shell pc-commercial-layout">
-            <div className="pc-commercial-copy">
-              <span><Store aria-hidden="true" /> PreçoCerto para comerciantes</span>
-              <h2 id="pc-commercial-title">Sua loja pode aparecer onde o cliente já está pesquisando.</h2>
-              <p>Crie sua presença digital, organize o catálogo, apresente preços e prepare seu comércio para receber pedidos online pela plataforma.</p>
-              <div className="pc-commercial-features">
-                <span><Smartphone aria-hidden="true" /> Vitrine digital</span>
-                <span><PackageSearch aria-hidden="true" /> Catálogo organizado</span>
-                <span><BadgeDollarSign aria-hidden="true" /> Preços e ofertas</span>
-              </div>
-              <Link to="/lojista">Quero colocar minha loja no PreçoCerto <ArrowRight aria-hidden="true" /></Link>
-            </div>
+        <section className="pcx-business">
+          <div className="pcx-shell pcx-business__grid">
+            <div><span className="pcx-eyebrow"><Store aria-hidden="true" /> Para comerciantes</span><h2>Sua loja na rota de quem quer comprar melhor.</h2><p>Divulgue seus produtos, mantenha preços atualizados e seja encontrado por clientes de toda Feijó.</p></div>
+            <div className="pcx-business__actions"><Link to="/lojista">Cadastrar minha loja <ArrowRight aria-hidden="true" /></Link><Link to="/estabelecimentos">Ver vitrine local</Link></div>
           </div>
         </section>
       </main>
 
-      {selectedProduct && (() => {
-        const offers = [...(selectedProduct.offers ?? [])].filter((offer) => offer.value > 0).sort((a, b) => a.value - b.value);
-        const image = resolveProductImage(selectedProduct);
-        return (
-          <div className="pc-modal" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedProduct(null); }}>
-            <section ref={dialogRef} className="pc-dialog" role="dialog" aria-modal="true" aria-labelledby="pc-dialog-title">
-              <button ref={closeRef} className="pc-dialog-close" type="button" aria-label="Fechar comparação" onClick={() => setSelectedProduct(null)}><X aria-hidden="true" /></button>
-              <div className="pc-dialog-media">{image ? <img src={image} alt={selectedProduct.name} /> : <PackageSearch aria-hidden="true" />}</div>
-              <div className="pc-dialog-content">
-                <span className="pc-dialog-kicker">{selectedProduct.category || "Produto"}</span>
-                <h2 id="pc-dialog-title">{selectedProduct.name}</h2>
-                <p>{[selectedProduct.brand, selectedProduct.size].filter(Boolean).join(" · ")}</p>
-                <div className="pc-dialog-prices"><span><small>Menor</small><strong>{money(selectedProduct.minPrice)}</strong></span><span><small>Média</small><strong>{money(selectedProduct.avgPrice)}</strong></span><span><small>Maior</small><strong>{money(selectedProduct.maxPrice)}</strong></span></div>
-                <div className="pc-dialog-offers">
-                  {(offers.length ? offers : [bestOffer(selectedProduct)]).slice(0, 5).map((offer, index) => (
-                    <div className={index === 0 ? "is-best" : ""} key={`${offer.establishmentId}-${offer.value}`}><span><strong>{offer.establishment}</strong><small>{offer.neighborhood || "Feijó, AC"}</small></span>{index === 0 && <em>Melhor preço</em>}<b>{money(offer.value)}</b></div>
+      {selectedProduct && (
+        <div className="pcx-modal" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedProduct(null); }}>
+          <section ref={dialogRef} className="pcx-dialog" role="dialog" aria-modal="true" aria-labelledby="pcx-dialog-title">
+            <button ref={closeRef} className="pcx-dialog__close" type="button" onClick={() => setSelectedProduct(null)} aria-label="Fechar detalhes"><X aria-hidden="true" /></button>
+            <div className="pcx-dialog__media">
+              {resolveProductImage(selectedProduct) ? <img src={resolveProductImage(selectedProduct)} alt={selectedProduct.name} /> : <PackageSearch aria-hidden="true" />}
+            </div>
+            <div className="pcx-dialog__content">
+              <span className="pcx-kicker">Comparação de preços</span>
+              <h2 id="pcx-dialog-title">{selectedProduct.name}</h2>
+              <p>{selectedProduct.brand} · {selectedProduct.size} · {selectedProduct.category}</p>
+              <div className="pcx-dialog__summary"><div><small>Menor preço</small><strong>{money(selectedProduct.minPrice)}</strong></div><div><small>Preço médio</small><strong>{money(selectedProduct.avgPrice)}</strong></div><div><small>Diferença</small><strong>{money(Math.max(0, selectedProduct.maxPrice - selectedProduct.minPrice))}</strong></div></div>
+              <div className="pcx-dialog__offers">
+                {([...(selectedProduct.offers ?? [])].sort((a, b) => a.value - b.value).slice(0, 5).length
+                  ? [...(selectedProduct.offers ?? [])].sort((a, b) => a.value - b.value).slice(0, 5)
+                  : [bestOffer(selectedProduct)]).map((offer, index) => (
+                    <div key={`${offer.establishmentId}-${index}`}><span><strong>{offer.establishment}</strong><small><MapPin aria-hidden="true" /> {offer.neighborhood}</small></span>{index === 0 && <em>Melhor preço</em>}<b>{money(offer.value)}</b></div>
                   ))}
-                </div>
-                <div className="pc-dialog-actions"><Link to={`/produto/${selectedProduct.slug || selectedProduct.id}`} onClick={() => setSelectedProduct(null)}>Ver detalhes <ArrowRight aria-hidden="true" /></Link><button type="button" onClick={() => search(selectedProduct.name)}>Comparar similares</button></div>
               </div>
-            </section>
-          </div>
-        );
-      })()}
-
-      <footer className="pc-footer">
-        <div className="pc-shell pc-footer-inner">
-          <div className="pc-footer-brand"><img src="/logo-preco-certo-inversa.svg" alt="PreçoCerto" /><p>Pesquise, compare e escolha melhor no comércio local de Feijó.</p></div>
-          <nav aria-label="Links do rodapé"><Link to="/buscar">Comparar</Link><Link to="/estabelecimentos">Estabelecimentos</Link><Link to="/cesta-basica">Minha cesta</Link><Link to="/lojista">Sou comerciante</Link><Link to="/fale-conosco">Contato</Link></nav>
+              <div className="pcx-dialog__actions"><Link to={`/buscar?q=${encodeURIComponent(selectedProduct.name)}`}>Ver página de comparação <ArrowRight aria-hidden="true" /></Link><button type="button" onClick={() => setSelectedProduct(null)}>Continuar navegando</button></div>
+            </div>
+          </section>
         </div>
-        <div className="pc-shell pc-footer-bottom"><span>PreçoCerto · Feijó, Acre</span><span>Informação local para compras mais inteligentes.</span></div>
+      )}
+
+      <footer className="pcx-footer">
+        <div className="pcx-shell pcx-footer__top">
+          <Link className="pcx-brand" to="/"><span className="pcx-brand__mark"><TrendingDown aria-hidden="true" /></span><span>preço<strong>certo</strong></span></Link>
+          <p>Informação local para escolhas mais inteligentes.</p>
+          <nav aria-label="Links do rodapé"><Link to="/buscar">Comparar</Link><Link to="/estabelecimentos">Lojas</Link><Link to="/colaborar">Colaborar</Link><Link to="/fale-conosco">Contato</Link></nav>
+        </div>
+        <div className="pcx-shell pcx-footer__bottom"><span>© 2026 PreçoCerto</span><span>Feito em Feijó, Acre.</span></div>
       </footer>
     </div>
   );

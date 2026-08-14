@@ -1,0 +1,39 @@
+:root {
+  --brand-primary: #2457f5;
+  --brand-primary-dark: #153bc2;
+  --brand-accent: #d8ff3e;
+  --brand-ink: #0b1020;
+  --brand-canvas: #f4f5ed;
+  --brand-surface: #ffffff;
+  --brand-line: #d8dcd2;
+}
+
+html { background: var(--brand-canvas); }
+body { background: var(--brand-canvas); color: var(--brand-ink); font-family: "Inter Variable", Inter, system-ui, sans-serif; }
+
+[data-theme="dark"] {
+  --brand-primary: #7091ff;
+  --brand-primary-dark: #9aafff;
+  --brand-ink: #f6f7ef;
+  --brand-canvas: #080c17;
+  --brand-surface: #111827;
+  --brand-line: #2a3346;
+}
+
+/* Shared visual layer for the rest of the product. Layout and business states
+   stay untouched; color, focus and controls now follow the homepage identity. */
+body :where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid var(--brand-accent);
+  outline-offset: 3px;
+}
+
+body :where(button, [role="button"]) { touch-action: manipulation; }
+body :where(input, select, textarea) { accent-color: var(--brand-primary); }
+body :where(.app-shell, .page-shell, .dashboard-shell, .public-page, .catalog-page) { color: var(--brand-ink); }
+body :where(.card, .panel, .surface, .dashboard-card, .catalog-card) { border-color: var(--brand-line); background-color: var(--brand-surface); }
+body :where(.button-primary, .btn-primary, [data-variant="primary"]) { background-color: var(--brand-primary); color: #fff; }
+body :where(.button-primary, .btn-primary, [data-variant="primary"]):hover { background-color: var(--brand-primary-dark); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+}
