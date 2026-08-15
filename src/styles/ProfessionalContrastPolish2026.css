@@ -1,0 +1,166 @@
+/* PreçoCerto — professional contrast + atmospheric surfaces, 2026 */
+
+/* Light mode: avoid a flat white canvas while keeping product imagery readable. */
+html:not([data-theme="dark"]) body {
+  background:
+    radial-gradient(circle at 8% 6%, rgba(53,99,233,.10), transparent 24rem),
+    radial-gradient(circle at 92% 18%, rgba(242,184,75,.11), transparent 22rem),
+    linear-gradient(180deg, #f8faff 0%, #f5f7fb 42%, #eef3f9 100%);
+  background-attachment: fixed;
+}
+
+html:not([data-theme="dark"]) .pcx-home {
+  background: transparent !important;
+}
+
+html:not([data-theme="dark"]) .pcx-home::before {
+  opacity: 1 !important;
+  background:
+    radial-gradient(ellipse 48% 32% at 78% 7%, rgba(53,99,233,.13), transparent 72%),
+    radial-gradient(ellipse 38% 28% at 14% 38%, rgba(242,184,75,.09), transparent 72%),
+    linear-gradient(135deg, rgba(255,255,255,.78), rgba(241,246,253,.62)) !important;
+}
+
+html:not([data-theme="dark"]) .pcx-home::after {
+  opacity: .72 !important;
+  background-image:
+    linear-gradient(rgba(53,99,233,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(53,99,233,.035) 1px, transparent 1px) !important;
+  background-size: 56px 56px !important;
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.55) 38%, transparent 82%);
+}
+
+/* Premium glass surfaces — enough separation without gray boxes everywhere. */
+html:not([data-theme="dark"]) :where(.pcx-category,.pcx-product,.pcx-compare__board,.pcx-dialog,.card,.panel,.surface,.dashboard-card,.catalog-card) {
+  border-color: #d8e0eb !important;
+  background-color: rgba(255,255,255,.90) !important;
+  box-shadow: 0 12px 34px rgba(23,43,77,.075) !important;
+}
+
+html:not([data-theme="dark"]) :where(.pcx-section__head p,.pcx-product__meta,.pcx-product__store,.pcx-compare__hint,.muted,.text-muted,.secondary-text) {
+  color: #536176 !important;
+}
+
+html:not([data-theme="dark"]) :where(h1,h2,h3,h4,.pcx-product__name,.pcx-category strong) {
+  color: #14213a;
+}
+
+/* Dark mode: lift secondary copy and borders so information never disappears. */
+html[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(111,143,242,.10), transparent 28rem),
+    radial-gradient(circle at 88% 18%, rgba(242,184,75,.045), transparent 24rem),
+    linear-gradient(180deg, #0b1220 0%, #0e1728 48%, #0b1321 100%);
+  background-attachment: fixed;
+}
+
+html[data-theme="dark"] :where(.pcx-section__head p,.pcx-product__meta,.pcx-product__store,.pcx-compare__hint,.muted,.text-muted,.secondary-text) {
+  color: #b8c3d2 !important;
+}
+
+html[data-theme="dark"] :where(.pcx-category,.pcx-product,.pcx-compare__board,.pcx-dialog,.card,.panel,.surface,.dashboard-card,.catalog-card) {
+  border-color: #33445f !important;
+  background-color: rgba(19,30,48,.94) !important;
+  box-shadow: 0 16px 38px rgba(0,0,0,.24) !important;
+}
+
+/* Controls: strong AA-friendly separation in both themes. */
+html:not([data-theme="dark"]) :where(input,select,textarea) {
+  color: #172033;
+  background-color: rgba(255,255,255,.96);
+  border-color: #cbd5e1;
+}
+
+html[data-theme="dark"] :where(input,select,textarea) {
+  color: #f4f7fb;
+  background-color: #111d30;
+  border-color: #40516b;
+}
+
+:where(input,select,textarea)::placeholder { color: #68768b; opacity: 1; }
+html[data-theme="dark"] :where(input,select,textarea)::placeholder { color: #9eabbd; }
+
+/* Primary action remains blue; savings remains green; attention remains amber. */
+:where(.button-primary,.btn-primary,[data-variant="primary"],.pcx-product__action,.pcx-search__control button,.pcx-compare__board > button) {
+  background: #315bd6 !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 8px 20px rgba(49,91,214,.20) !important;
+}
+
+:where(.button-primary,.btn-primary,[data-variant="primary"],.pcx-product__action,.pcx-search__control button,.pcx-compare__board > button):hover {
+  background: #2448b8 !important;
+}
+
+html[data-theme="dark"] :where(.button-primary,.btn-primary,[data-variant="primary"],.pcx-product__action,.pcx-search__control button,.pcx-compare__board > button) {
+  background: #7898f5 !important;
+  color: #081226 !important;
+  box-shadow: 0 8px 22px rgba(111,143,242,.18) !important;
+}
+
+:where(.pcx-product__saving,.pcx-offer.is-best) {
+  color: #216e49 !important;
+}
+html[data-theme="dark"] :where(.pcx-product__saving,.pcx-offer.is-best) {
+  color: #79c99f !important;
+}
+
+/* Header clarity and navigation contrast. */
+html:not([data-theme="dark"]) .pcx-header {
+  background: rgba(249,251,255,.90) !important;
+  border-bottom-color: rgba(23,43,77,.11) !important;
+  backdrop-filter: blur(18px) saturate(150%);
+}
+html:not([data-theme="dark"]) .pcx-nav a { color: #35445d !important; }
+html:not([data-theme="dark"]) .pcx-nav a:hover { color: #274fc7 !important; }
+html[data-theme="dark"] .pcx-nav a { color: #d6deea !important; }
+
+/* Hero gets depth in light mode instead of looking like a blank white sheet. */
+html:not([data-theme="dark"]) .pcx-hero {
+  background:
+    radial-gradient(circle at 80% 24%, rgba(53,99,233,.16), transparent 27rem),
+    radial-gradient(circle at 20% 88%, rgba(242,184,75,.12), transparent 23rem),
+    linear-gradient(125deg, rgba(255,255,255,.98) 0%, #eef4ff 52%, #e4edff 100%) !important;
+  border-bottom: 1px solid rgba(53,99,233,.09);
+}
+
+html:not([data-theme="dark"]) .pcx-hero__copy > p { color: #4d5c72 !important; }
+html:not([data-theme="dark"]) .pcx-hero h1 { color: #14213a !important; }
+html:not([data-theme="dark"]) .pcx-hero h1 em { color: #2d58d3 !important; }
+
+/* Search should be the visual anchor of the landing page. */
+html:not([data-theme="dark"]) .pcx-search {
+  border-color: #cbd7e7 !important;
+  background: rgba(255,255,255,.97) !important;
+  box-shadow: 0 20px 48px rgba(23,43,77,.14), 0 1px 0 rgba(255,255,255,.9) inset !important;
+}
+html[data-theme="dark"] .pcx-search {
+  border-color: #40516b !important;
+  background: rgba(17,29,48,.98) !important;
+}
+
+/* Accessible keyboard focus, independent of theme. */
+body :where(a,button,input,select,textarea,[tabindex]):focus-visible {
+  outline: 3px solid #f2b84b !important;
+  outline-offset: 3px !important;
+}
+
+/* Links must remain recognizable without relying only on hue. */
+main :where(p,li) > a:not([class]) {
+  color: #274fc7;
+  text-decoration: underline;
+  text-decoration-thickness: .08em;
+  text-underline-offset: .16em;
+}
+html[data-theme="dark"] main :where(p,li) > a:not([class]) { color: #9ab0ff; }
+
+@media (max-width: 720px) {
+  html:not([data-theme="dark"]) body,
+  html[data-theme="dark"] body { background-attachment: scroll; }
+  html:not([data-theme="dark"]) .pcx-home::after { background-size: 42px 42px !important; opacity: .48 !important; }
+  html:not([data-theme="dark"]) .pcx-hero { background-position: center !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+}
