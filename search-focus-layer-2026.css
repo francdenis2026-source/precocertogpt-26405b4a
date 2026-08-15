@@ -1,8 +1,8 @@
 /* PreçoCerto — focused autocomplete interaction.
-   Keeps the search anchored to the user's task without turning it into a fullscreen modal. */
+   Search stays anchored in the hero; the page scrolls to it, then the homepage scroll locks. */
 
-html:has(.pcn-search-dropdown),
-body:has(.pcn-search-dropdown) {
+html.pc-search-focus-lock,
+body.pc-search-focus-lock {
   overflow: hidden;
   overscroll-behavior: none;
 }
@@ -11,50 +11,60 @@ body:has(.pcn-search-dropdown) {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 2147481900;
+  z-index: 90;
   pointer-events: none;
-  background: rgba(7, 24, 38, .34);
-  backdrop-filter: blur(3px) saturate(.92);
-  -webkit-backdrop-filter: blur(3px) saturate(.92);
-  animation: pc-search-focus-fade .16s ease-out both;
+  background: rgba(7, 24, 38, .22);
+  backdrop-filter: blur(2px) saturate(.96);
+  -webkit-backdrop-filter: blur(2px) saturate(.96);
+  animation: pc-search-focus-fade .14s ease-out both;
+}
+
+/* The hero must stop clipping the anchored dropdown while search is active. */
+.pcn-home .pcn-hero:has(.pcn-search-dropdown) {
+  overflow: visible;
+  z-index: 120;
+}
+
+.pcn-home .pcn-hero:has(.pcn-search-dropdown) .pcn-hero__content {
+  position: relative;
+  z-index: 130;
 }
 
 .pcn-search-shell:has(.pcn-search-dropdown) {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: min(760px, calc(100vw - 36px));
-  margin: 0;
-  z-index: 2147482000;
-  transform: translate(-50%, -48%);
+  position: relative;
+  z-index: 214;
   isolation: isolate;
-  animation: pc-search-focus-center .2s cubic-bezier(.2,.8,.2,1) both;
 }
 
 .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search {
-  border-color: rgba(87, 148, 255, .66);
+  position: relative;
+  z-index: 216;
+  border-color: rgba(87, 148, 255, .68);
   box-shadow:
-    0 24px 70px rgba(3, 22, 38, .28),
-    0 0 0 5px rgba(93, 151, 255, .13),
+    0 22px 60px rgba(3, 22, 38, .24),
+    0 0 0 5px rgba(93, 151, 255, .12),
     0 1px 0 rgba(255,255,255,.8) inset;
 }
 
 .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown {
-  top: calc(100% + 12px);
-  max-height: min(470px, 56vh);
-  border-color: rgba(114, 154, 187, .42);
-  box-shadow: 0 34px 90px rgba(2, 18, 31, .34), 0 5px 16px rgba(3, 24, 40, .12);
+  z-index: 215;
+  top: calc(100% + 10px);
+  max-height: min(470px, 55vh);
+  border-color: rgba(114, 154, 187, .46);
+  box-shadow: 0 32px 84px rgba(2, 18, 31, .32), 0 5px 16px rgba(3, 24, 40, .12);
 }
 
 .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown__head {
   min-height: 46px;
   padding-inline: 17px;
-  background: linear-gradient(180deg, rgba(247,250,253,.96), rgba(242,247,251,.90));
+  background: linear-gradient(180deg, rgba(247,250,253,.98), rgba(242,247,251,.96));
 }
 
 .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown__list {
-  max-height: min(410px, 49vh);
+  max-height: min(410px, 48vh);
   padding: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   scrollbar-gutter: stable;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
@@ -73,18 +83,18 @@ body:has(.pcn-search-dropdown) {
 }
 
 [data-theme="dark"] .pcn-home:has(.pcn-search-dropdown)::after {
-  background: rgba(2, 13, 22, .48);
+  background: rgba(2, 13, 22, .36);
 }
 
 [data-theme="dark"] .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search {
   border-color: rgba(125, 177, 255, .68);
   box-shadow:
-    0 26px 76px rgba(0, 10, 18, .48),
+    0 24px 66px rgba(0, 10, 18, .42),
     0 0 0 5px rgba(116, 167, 255, .12);
 }
 
 [data-theme="dark"] .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown__head {
-  background: linear-gradient(180deg, rgba(29,64,88,.98), rgba(22,53,75,.96));
+  background: linear-gradient(180deg, rgba(29,64,88,.99), rgba(22,53,75,.98));
 }
 
 @keyframes pc-search-focus-fade {
@@ -92,40 +102,23 @@ body:has(.pcn-search-dropdown) {
   to { opacity: 1; }
 }
 
-@keyframes pc-search-focus-center {
-  from { opacity: .86; transform: translate(-50%, -45%) scale(.985); }
-  to { opacity: 1; transform: translate(-50%, -48%) scale(1); }
-}
-
 @media (max-width: 720px) {
   .pcn-home:has(.pcn-search-dropdown)::after {
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-  }
-
-  .pcn-search-shell:has(.pcn-search-dropdown) {
-    top: 46%;
-    width: calc(100vw - 24px);
-    transform: translate(-50%, -44%);
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
   }
 
   .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown {
-    max-height: min(430px, 58dvh);
+    max-height: min(420px, 52dvh);
   }
 
   .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown__list {
-    max-height: min(370px, 50dvh);
-  }
-
-  @keyframes pc-search-focus-center {
-    from { opacity: .86; transform: translate(-50%, -41%) scale(.985); }
-    to { opacity: 1; transform: translate(-50%, -44%) scale(1); }
+    max-height: min(360px, 45dvh);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pcn-home:has(.pcn-search-dropdown)::after,
-  .pcn-search-shell:has(.pcn-search-dropdown) {
+  .pcn-home:has(.pcn-search-dropdown)::after {
     animation: none;
   }
 }
