@@ -27,7 +27,7 @@ body :where(h1, h2, h3, h4, h5, h6) { font-family: "Outfit Variable", Outfit, "M
 /* Shared visual layer for the rest of the product. Layout and business states
    stay untouched; color, focus and controls now follow the homepage identity. */
 body :where(button, a, input, select, textarea):focus-visible {
-  outline: 3px solid var(--brand-accent);
+  outline: 3px solid var(--pc-color-focus);
   outline-offset: 3px;
 }
 
@@ -42,8 +42,8 @@ body :where(.button-primary, .btn-primary, [data-variant="primary"]):hover { bac
    search, marketplace, service pages, headers and footers. */
 body.pc-premium-public {
   --pc-hover-ease: cubic-bezier(.2,.8,.2,1);
-  --pc-hover-shadow: 0 18px 42px rgba(6,35,23,.16);
-  --pc-hover-halo: 0 0 0 4px color-mix(in srgb, var(--brand-primary) 12%, transparent);
+  --pc-hover-shadow: 0 18px 42px rgba(23,32,51,.12);
+  --pc-hover-halo: 0 0 0 4px color-mix(in srgb, var(--brand-primary) 11%, transparent);
 }
 
 body.pc-premium-public :where(
@@ -142,12 +142,10 @@ body.pc-premium-public :where(.pcx-footer nav a, .site-footer a, footer nav a, .
     z-index: 2;
     border-color: color-mix(in srgb, var(--brand-primary) 58%, var(--brand-line)) !important;
     box-shadow: var(--pc-hover-shadow), var(--pc-hover-halo) !important;
-    transform: translateY(-4px) scale(1.008) !important;
+    transform: translateY(-3px) !important;
   }
 
-  body.pc-premium-public .pcx-category:hover {
-    transform: translateY(-4px) scale(1.012) !important;
-  }
+  body.pc-premium-public .pcx-category:hover { transform: translateY(-3px) !important; }
 
   body.pc-premium-public :where(
     header .pcx-brand,
@@ -169,21 +167,15 @@ body.pc-premium-public :where(.pcx-footer nav a, .site-footer a, footer nav a, .
     .button,
     a[class*="cta"],
     a[class*="action"]
-  ):hover {
-    transform: translateY(-2px) !important;
-  }
+  ):hover { transform: translateY(-1px) !important; }
 
   body.pc-premium-public :where(.pcx-footer nav a, .site-footer a, footer nav a, .pcx-footer__credit):hover {
     color: #fff !important;
-    transform: translateY(-2px) !important;
+    transform: translateY(-1px) !important;
   }
 
   body.pc-premium-public :where(.pcx-footer nav a, .site-footer a, footer nav a):hover {
     background: color-mix(in srgb, white 8%, transparent);
-  }
-
-  body.pc-premium-public .pcx-footer .pcx-brand:hover .pcx-brand__mark {
-    transform: translateY(-2px) rotate(-4deg) scale(1.04) !important;
   }
 }
 
@@ -206,6 +198,330 @@ body.pc-premium-public :where(
 ):active {
   transform: scale(.985) !important;
   transition-duration: 110ms !important;
+}
+
+/* Brand refresh 2026 — blue for trust, amber for attention, green only for savings. */
+.pcx-home {
+  --pcx-bg: var(--pc-color-background) !important;
+  --pcx-surface: var(--pc-color-surface) !important;
+  --pcx-ink: var(--pc-color-foreground) !important;
+  --pcx-muted: var(--pc-color-muted) !important;
+  --pcx-line: var(--pc-color-border) !important;
+  --pcx-primary: var(--pc-color-primary) !important;
+  --pcx-accent: var(--pc-color-accent) !important;
+  background: var(--pc-color-background) !important;
+}
+
+.pcx-home::before {
+  background:
+    radial-gradient(circle at 84% 8%, rgba(53,99,233,.08), transparent 28%),
+    radial-gradient(circle at 12% 42%, rgba(242,184,75,.06), transparent 24%),
+    linear-gradient(180deg, #f7f8fa 0%, #fbfcfe 48%, #f3f5f8 100%) !important;
+}
+
+.pcx-home::after {
+  background: linear-gradient(110deg, rgba(255,255,255,.36), transparent 38%, rgba(53,99,233,.025) 72%, transparent) !important;
+}
+
+html[data-theme="dark"] .pcx-home::before {
+  background:
+    radial-gradient(circle at 82% 8%, rgba(111,143,242,.11), transparent 27%),
+    radial-gradient(circle at 10% 44%, rgba(242,184,75,.045), transparent 24%),
+    linear-gradient(180deg, #0e1523 0%, #101827 52%, #0c1320 100%) !important;
+}
+
+html[data-theme="dark"] .pcx-home::after {
+  background: linear-gradient(110deg, rgba(255,255,255,.018), transparent 40%, rgba(111,143,242,.015)) !important;
+}
+
+.pcx-header {
+  border-bottom-color: rgba(255,255,255,.1) !important;
+  background: linear-gradient(180deg, rgba(14,21,35,.84), rgba(14,21,35,.64)) !important;
+  box-shadow: 0 10px 30px rgba(9,18,34,.08) !important;
+}
+
+html:not([data-theme="dark"]) .pcx-header {
+  border-color: rgba(23,32,51,.08) !important;
+  background: rgba(255,255,255,.9) !important;
+  color: #172033 !important;
+}
+
+.pcx-header.is-scrolled {
+  border-color: color-mix(in srgb, var(--pc-color-border) 82%, transparent) !important;
+  background: color-mix(in srgb, var(--pc-color-background) 91%, transparent) !important;
+  box-shadow: 0 10px 30px rgba(23,32,51,.08) !important;
+}
+
+.pcx-brand__mark {
+  background: linear-gradient(145deg, #3563e9, #274fc7) !important;
+  color: #fff !important;
+  border-radius: 11px !important;
+  box-shadow: 0 8px 20px rgba(53,99,233,.24) !important;
+}
+
+.pcx-nav a::after { background: var(--pc-color-primary) !important; }
+.pcx-nav a:hover { color: var(--pc-color-primary) !important; }
+
+.pcx-icon-button:hover,
+.pcx-menu-button:hover {
+  border-color: var(--pc-color-primary) !important;
+  background: color-mix(in srgb, var(--pc-color-primary) 9%, transparent) !important;
+  color: var(--pc-color-primary) !important;
+}
+
+.pcx-theme-toggle {
+  border-color: rgba(255,255,255,.18) !important;
+  background: rgba(15,24,40,.72) !important;
+  box-shadow: 0 6px 18px rgba(8,15,28,.16) !important;
+}
+
+html:not([data-theme="dark"]) .pcx-theme-toggle {
+  border-color: #dce3ec !important;
+  background: #f3f5f8 !important;
+  color: #172033 !important;
+}
+
+.pcx-theme-toggle__thumb {
+  background: #fff !important;
+  box-shadow: 0 3px 10px rgba(23,32,51,.14) !important;
+}
+
+.pcx-theme-toggle[aria-pressed="true"] .pcx-theme-toggle__thumb {
+  background: #6f8ff2 !important;
+  box-shadow: 0 4px 13px rgba(53,99,233,.32) !important;
+}
+
+.pcx-theme-toggle__sun { color: #d99b22 !important; }
+.pcx-theme-toggle__moon { color: #6f8ff2 !important; }
+
+.pcx-merchant {
+  background: var(--pc-color-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 20px rgba(53,99,233,.18) !important;
+}
+.pcx-merchant:hover { background: var(--pc-color-primary-hover) !important; }
+
+.pcx-hero {
+  background: #eef3ff !important;
+  color: #172033 !important;
+}
+
+.pcx-hero::before {
+  background:
+    radial-gradient(circle at 78% 18%, rgba(53,99,233,.15), transparent 29%),
+    radial-gradient(circle at 18% 78%, rgba(242,184,75,.12), transparent 28%),
+    linear-gradient(125deg, #fbfcff 0%, #eef3ff 54%, #e3eaff 100%) !important;
+}
+
+.pcx-hero::after {
+  border-color: rgba(53,99,233,.09) !important;
+  box-shadow: 0 0 0 7vw rgba(255,255,255,.24), 0 0 0 14vw rgba(53,99,233,.025) !important;
+}
+
+html[data-theme="dark"] .pcx-hero {
+  background: #111d34 !important;
+  color: #f4f7fb !important;
+}
+
+html[data-theme="dark"] .pcx-hero::before {
+  background:
+    radial-gradient(circle at 78% 22%, rgba(111,143,242,.25), transparent 31%),
+    radial-gradient(circle at 18% 78%, rgba(242,184,75,.07), transparent 28%),
+    linear-gradient(125deg, #0e1728 0%, #152745 55%, #1b3154 100%) !important;
+}
+
+html[data-theme="dark"] .pcx-hero::after {
+  border-color: rgba(255,255,255,.07) !important;
+  box-shadow: 0 0 0 7vw rgba(255,255,255,.02), 0 0 0 14vw rgba(111,143,242,.025) !important;
+}
+
+.pcx-hero h1 em { color: #3563e9 !important; }
+html[data-theme="dark"] .pcx-hero h1 em { color: #f2b84b !important; }
+
+.pcx-hero__copy > p { color: #596579 !important; }
+html[data-theme="dark"] .pcx-hero__copy > p { color: #c1cad7 !important; }
+
+.pcx-hero__portrait {
+  background: #172b4d !important;
+  box-shadow: 0 34px 80px rgba(23,43,77,.25) !important;
+}
+.pcx-hero__portrait::after { background: linear-gradient(180deg, transparent 45%, rgba(9,20,38,.72)) !important; }
+
+.pcx-search {
+  border-color: #d8e0eb !important;
+  background: rgba(255,255,255,.98) !important;
+  box-shadow: 0 18px 44px rgba(23,32,51,.12) !important;
+}
+html[data-theme="dark"] .pcx-search {
+  border-color: #31415a !important;
+  background: rgba(21,31,48,.98) !important;
+  box-shadow: 0 18px 44px rgba(0,0,0,.25) !important;
+}
+
+.pcx-search:focus-within {
+  border-color: color-mix(in srgb, var(--pc-color-primary) 68%, white) !important;
+  box-shadow: 0 18px 44px rgba(23,32,51,.12), 0 0 0 4px rgba(53,99,233,.09) !important;
+}
+
+.pcx-search__control > svg { color: var(--pc-color-primary) !important; }
+.pcx-search__control button {
+  background: var(--pc-color-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(53,99,233,.2) !important;
+}
+.pcx-search__control button:hover { background: var(--pc-color-primary-hover) !important; }
+
+.pcx-quick > span { color: var(--pc-color-muted) !important; }
+.pcx-quick button {
+  border-color: #dce3ec !important;
+  background: rgba(255,255,255,.65) !important;
+  color: #43506a !important;
+}
+.pcx-quick button:hover {
+  border-color: color-mix(in srgb, var(--pc-color-primary) 42%, #dce3ec) !important;
+  background: rgba(53,99,233,.07) !important;
+  color: var(--pc-color-primary) !important;
+}
+html[data-theme="dark"] .pcx-quick button {
+  border-color: #30405a !important;
+  background: rgba(21,31,48,.68) !important;
+  color: #d3dae5 !important;
+}
+
+.pcx-results {
+  border-color: var(--pc-color-border) !important;
+  background: var(--pc-dialog-bg) !important;
+  box-shadow: 0 24px 60px rgba(23,32,51,.18) !important;
+}
+.pcx-results button:hover,
+.pcx-results button.is-active {
+  background: color-mix(in srgb, var(--pc-color-primary) 8%, var(--pc-dialog-bg)) !important;
+}
+.pcx-result__price strong { color: var(--pc-color-positive) !important; }
+
+.pcx-receipt {
+  border-color: rgba(255,255,255,.72) !important;
+  background: rgba(255,255,255,.94) !important;
+  color: #172033 !important;
+  box-shadow: 0 24px 60px rgba(23,32,51,.18) !important;
+}
+html[data-theme="dark"] .pcx-receipt {
+  border-color: #2b3c57 !important;
+  background: rgba(21,31,48,.96) !important;
+  color: #f4f7fb !important;
+}
+.pcx-receipt__head span { color: var(--pc-color-primary) !important; }
+.pcx-receipt__total strong { color: var(--pc-color-positive) !important; }
+.pcx-receipt > button {
+  background: var(--pc-color-primary) !important;
+  color: #fff !important;
+}
+.pcx-receipt > button:hover { background: var(--pc-color-primary-hover) !important; }
+
+.pcx-category,
+.pcx-product,
+.pcx-compare__board,
+.pcx-dialog {
+  border-color: var(--pc-color-border) !important;
+  background: var(--pc-color-surface) !important;
+  box-shadow: var(--pc-shadow-card) !important;
+}
+
+.pcx-category__icon {
+  background: color-mix(in srgb, var(--pc-color-primary) 9%, white) !important;
+  color: var(--pc-color-primary) !important;
+}
+html[data-theme="dark"] .pcx-category__icon {
+  background: color-mix(in srgb, var(--pc-color-primary) 14%, #151f30) !important;
+}
+
+.pcx-product__saving {
+  background: color-mix(in srgb, var(--pc-color-positive) 12%, white) !important;
+  color: var(--pc-color-positive) !important;
+  border-color: color-mix(in srgb, var(--pc-color-positive) 25%, transparent) !important;
+}
+html[data-theme="dark"] .pcx-product__saving {
+  background: color-mix(in srgb, var(--pc-color-positive) 16%, #151f30) !important;
+}
+.pcx-product__price b { color: var(--pc-color-positive) !important; }
+.pcx-product__action { background: var(--pc-color-primary) !important; color: #fff !important; }
+
+.pcx-market {
+  background: color-mix(in srgb, var(--pc-color-background) 84%, #e9eef7) !important;
+}
+html[data-theme="dark"] .pcx-market {
+  background: color-mix(in srgb, var(--pc-color-background) 86%, #16233a) !important;
+}
+
+.pcx-story--community {
+  background: #172b4d !important;
+  color: #fff !important;
+}
+.pcx-story--merchant {
+  background: #eef3ff !important;
+  color: #172033 !important;
+}
+html[data-theme="dark"] .pcx-story--merchant {
+  background: #151f30 !important;
+  color: #f4f7fb !important;
+}
+.pcx-story a {
+  border-color: color-mix(in srgb, currentColor 22%, transparent) !important;
+  background: rgba(255,255,255,.08) !important;
+}
+.pcx-story--merchant a {
+  background: var(--pc-color-primary) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+.pcx-offer.is-best {
+  border-color: color-mix(in srgb, var(--pc-color-positive) 38%, var(--pc-color-border)) !important;
+  background: color-mix(in srgb, var(--pc-color-positive) 8%, var(--pc-color-surface)) !important;
+}
+.pcx-offer.is-best > span,
+.pcx-offer.is-best > b { color: var(--pc-color-positive) !important; }
+.pcx-compare__board > button {
+  background: var(--pc-color-primary) !important;
+  color: #fff !important;
+}
+
+.pcx-dialog__summary > div:first-child strong,
+.pcx-dialog__offers > div:first-child > b,
+.pcx-dialog__offers em { color: var(--pc-color-positive) !important; }
+.pcx-dialog__actions a {
+  background: var(--pc-color-primary) !important;
+  color: #fff !important;
+}
+.pcx-dialog__actions button {
+  border-color: var(--pc-color-border) !important;
+  background: transparent !important;
+  color: var(--pc-color-foreground) !important;
+}
+
+.pcx-footer {
+  background: #111c31 !important;
+  color: #d8dfeb !important;
+  border-top-color: rgba(255,255,255,.08) !important;
+}
+.pcx-footer .pcx-brand { color: #fff !important; }
+
+@media (max-width: 900px) {
+  .pcx-hero { min-height: auto !important; padding-top: 94px !important; }
+  .pcx-hero h1 { font-size: clamp(2.65rem, 9vw, 4rem) !important; line-height: .95 !important; }
+  .pcx-hero__visual { min-height: 410px !important; }
+  .pcx-search { border-radius: 15px !important; }
+}
+
+@media (max-width: 560px) {
+  .pcx-shell { width: min(calc(100% - 28px), var(--pcx-shell)) !important; }
+  .pcx-hero { padding-top: 88px !important; padding-bottom: 34px !important; }
+  .pcx-hero h1 { font-size: clamp(2.35rem, 11.5vw, 3.25rem) !important; letter-spacing: -.045em !important; }
+  .pcx-hero__copy > p { font-size: .96rem !important; line-height: 1.58 !important; }
+  .pcx-search { box-shadow: 0 12px 32px rgba(23,32,51,.12) !important; }
+  .pcx-category,
+  .pcx-product,
+  .pcx-compare__board { border-radius: 16px !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -233,4 +549,3 @@ body.pc-premium-public :where(
     transition-duration: 0ms !important;
   }
 }
-
