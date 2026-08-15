@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /painel-lojista/
+Disallow: /meus-pedidos
+Disallow: /integracoes/
+
+Sitemap: https://precocerto.live/sitemap.xml
