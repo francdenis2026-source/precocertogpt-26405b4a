@@ -1,17 +1,31 @@
 /* PreçoCerto — primitives → semantics → components */
 :root {
-  --pc-color-forest-700: #17493a;
-  --pc-color-forest-800: #10372c;
-  --pc-color-copper-500: #a84d2c;
-  --pc-color-copper-600: #873b22;
-  --pc-color-parchment-50: #fbf8f1;
-  --pc-color-parchment-100: #f1eadf;
-  --pc-color-ink-900: #18211c;
-  --pc-color-ink-600: #5d675f;
-  --pc-color-line: #d9d0c1;
+  /* Brand primitives */
+  --pc-color-navy-900: #172033;
+  --pc-color-navy-800: #172b4d;
+  --pc-color-blue-600: #3563e9;
+  --pc-color-blue-700: #274fc7;
+  --pc-color-amber-500: #f2b84b;
+  --pc-color-amber-600: #d99b22;
+  --pc-color-green-600: #2f855a;
+  --pc-color-coral-500: #d97757;
+  --pc-color-slate-600: #667085;
+  --pc-color-line: #e2e7ee;
+  --pc-color-canvas: #f7f8fa;
   --pc-color-white: #ffffff;
-  --pc-color-success: #247052;
-  --pc-color-danger: #b43f3f;
+  --pc-color-danger: #b42318;
+
+  /* Backward-compatible aliases for older layers */
+  --pc-color-forest-700: var(--pc-color-navy-800);
+  --pc-color-forest-800: var(--pc-color-navy-900);
+  --pc-color-copper-500: var(--pc-color-amber-500);
+  --pc-color-copper-600: var(--pc-color-amber-600);
+  --pc-color-parchment-50: var(--pc-color-white);
+  --pc-color-parchment-100: var(--pc-color-canvas);
+  --pc-color-ink-900: var(--pc-color-navy-900);
+  --pc-color-ink-600: var(--pc-color-slate-600);
+  --pc-color-success: var(--pc-color-green-600);
+
   --pc-space-1: .25rem;
   --pc-space-2: .5rem;
   --pc-space-3: .75rem;
@@ -20,43 +34,57 @@
   --pc-space-8: 2rem;
   --pc-space-12: 3rem;
   --pc-space-16: 4rem;
-  --pc-radius-control: .65rem;
-  --pc-radius-card: .9rem;
-  --pc-radius-panel: 1.25rem;
-  --pc-shadow-card: 0 14px 36px rgba(25, 35, 29, .09);
-  --pc-shadow-dialog: 0 32px 100px rgba(7, 17, 12, .35);
+
+  --pc-radius-control: .75rem;
+  --pc-radius-card: 1rem;
+  --pc-radius-panel: 1.35rem;
+
+  --pc-shadow-card: 0 14px 36px rgba(23, 32, 51, .08);
+  --pc-shadow-dialog: 0 32px 100px rgba(10, 18, 34, .28);
+
   --pc-duration-fast: 150ms;
   --pc-duration-normal: 220ms;
   --pc-duration-slow: 340ms;
   --pc-ease-out: cubic-bezier(.23, 1, .32, 1);
-  --pc-color-background: var(--pc-color-parchment-100);
-  --pc-color-surface: rgba(251, 248, 241, .92);
-  --pc-color-foreground: var(--pc-color-ink-900);
-  --pc-color-muted: var(--pc-color-ink-600);
+
+  /* Semantic tokens */
+  --pc-color-background: var(--pc-color-canvas);
+  --pc-color-surface: rgba(255, 255, 255, .96);
+  --pc-color-foreground: var(--pc-color-navy-900);
+  --pc-color-muted: var(--pc-color-slate-600);
   --pc-color-border: var(--pc-color-line);
-  --pc-color-primary: var(--pc-color-forest-700);
-  --pc-color-primary-hover: var(--pc-color-forest-800);
+  --pc-color-primary: var(--pc-color-blue-600);
+  --pc-color-primary-hover: var(--pc-color-blue-700);
   --pc-color-primary-foreground: var(--pc-color-white);
-  --pc-color-accent: var(--pc-color-copper-500);
-  --pc-color-accent-hover: var(--pc-color-copper-600);
-  --pc-color-accent-foreground: var(--pc-color-white);
-  --pc-color-focus: #d77a50;
+  --pc-color-accent: var(--pc-color-amber-500);
+  --pc-color-accent-hover: var(--pc-color-amber-600);
+  --pc-color-accent-foreground: var(--pc-color-navy-900);
+  --pc-color-focus: #6f8ff2;
+  --pc-color-positive: var(--pc-color-green-600);
+  --pc-color-local: var(--pc-color-coral-500);
+
   --pc-button-height: 2.75rem;
   --pc-input-height: 3rem;
   --pc-card-bg: var(--pc-color-surface);
-  --pc-dialog-bg: var(--pc-color-parchment-50);
+  --pc-dialog-bg: var(--pc-color-white);
 }
 
 [data-theme="dark"] {
-  --pc-color-background: #101914;
-  --pc-color-surface: rgba(24, 35, 29, .94);
-  --pc-color-foreground: #f5efe5;
-  --pc-color-muted: #b9c1ba;
-  --pc-color-border: #3a483f;
-  --pc-color-primary: #79b99b;
-  --pc-color-primary-hover: #9bceb5;
-  --pc-color-primary-foreground: #0d2118;
-  --pc-color-accent: #bd5b35;
-  --pc-color-accent-hover: #d0734c;
-  --pc-dialog-bg: #18231d;
+  --pc-color-background: #0e1523;
+  --pc-color-surface: rgba(21, 31, 48, .96);
+  --pc-color-foreground: #f4f7fb;
+  --pc-color-muted: #aab4c3;
+  --pc-color-border: #2a3850;
+  --pc-color-primary: #6f8ff2;
+  --pc-color-primary-hover: #8aa5ff;
+  --pc-color-primary-foreground: #0b1220;
+  --pc-color-accent: #f2b84b;
+  --pc-color-accent-hover: #f6c968;
+  --pc-color-accent-foreground: #111827;
+  --pc-color-focus: #9ab0ff;
+  --pc-color-positive: #58b184;
+  --pc-color-local: #ef997b;
+  --pc-dialog-bg: #151f30;
+  --pc-shadow-card: 0 14px 36px rgba(0, 0, 0, .22);
+  --pc-shadow-dialog: 0 32px 100px rgba(0, 0, 0, .48);
 }
