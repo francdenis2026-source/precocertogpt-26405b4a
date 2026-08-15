@@ -1,7 +1,7 @@
 @import url('/home-economy-premium-2026.css');
 
 /* PreçoCerto — focused autocomplete interaction.
-   Results stay directly below the search field and float above the homepage. */
+   When typing, the search elevates into a comfortable focused position and results stay directly below it. */
 
 html:has(.pcn-search-dropdown),
 body:has(.pcn-search-dropdown) {
@@ -15,13 +15,13 @@ body:has(.pcn-search-dropdown) {
   inset: 0;
   z-index: 90;
   pointer-events: none;
-  background: rgba(7, 24, 38, .20);
-  backdrop-filter: blur(1.5px) saturate(.96);
-  -webkit-backdrop-filter: blur(1.5px) saturate(.96);
-  animation: pc-search-focus-fade .14s ease-out both;
+  background: rgba(7, 24, 38, .22);
+  backdrop-filter: blur(2px) saturate(.95);
+  -webkit-backdrop-filter: blur(2px) saturate(.95);
+  animation: pc-search-focus-fade .16s ease-out both;
 }
 
-/* HomeNext's hero normally clips children. During search it must allow the dropdown to escape. */
+/* During active search, the hero must not clip the elevated search/dropdown. */
 .pcn-home .pcn-hero:has(.pcn-search-dropdown) {
   overflow: visible;
   position: relative;
@@ -35,31 +35,40 @@ body:has(.pcn-search-dropdown) {
   overflow: visible;
 }
 
+/* Elevate and center the entire search experience, not just the dropdown. */
 .pcn-search-shell:has(.pcn-search-dropdown) {
-  position: relative;
+  position: fixed;
+  top: clamp(110px, 22vh, 210px);
+  left: 50%;
+  width: min(760px, calc(100vw - 40px));
+  margin: 0;
   z-index: 214;
   isolation: isolate;
+  transform: translateX(-50%);
+  animation: pc-search-elevate .22s cubic-bezier(.2,.8,.2,1) both;
 }
 
 .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search {
   position: relative;
   z-index: 216;
-  border-color: rgba(87, 148, 255, .68);
+  width: 100%;
+  margin: 0;
+  border-color: rgba(87, 148, 255, .72);
   box-shadow:
-    0 22px 60px rgba(3, 22, 38, .24),
-    0 0 0 5px rgba(93, 151, 255, .12),
+    0 24px 70px rgba(3, 22, 38, .28),
+    0 0 0 5px rgba(93, 151, 255, .13),
     0 1px 0 rgba(255,255,255,.8) inset;
 }
 
 .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown {
   position: absolute;
   z-index: 215;
-  top: calc(100% + 10px);
+  top: calc(100% + 12px);
   left: 0;
   right: 0;
-  max-height: min(470px, 55vh);
+  max-height: min(500px, 58vh);
   border-color: rgba(114, 154, 187, .46);
-  box-shadow: 0 32px 84px rgba(2, 18, 31, .32), 0 5px 16px rgba(3, 24, 40, .12);
+  box-shadow: 0 34px 90px rgba(2, 18, 31, .34), 0 5px 16px rgba(3, 24, 40, .12);
 }
 
 .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown__head {
@@ -69,7 +78,7 @@ body:has(.pcn-search-dropdown) {
 }
 
 .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown__list {
-  max-height: min(410px, 48vh);
+  max-height: min(440px, 50vh);
   padding: 8px;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -91,13 +100,13 @@ body:has(.pcn-search-dropdown) {
 }
 
 [data-theme="dark"] .pcn-home:has(.pcn-search-dropdown)::after {
-  background: rgba(2, 13, 22, .34);
+  background: rgba(2, 13, 22, .38);
 }
 
 [data-theme="dark"] .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search {
-  border-color: rgba(125, 177, 255, .68);
+  border-color: rgba(125, 177, 255, .72);
   box-shadow:
-    0 24px 66px rgba(0, 10, 18, .42),
+    0 26px 76px rgba(0, 10, 18, .46),
     0 0 0 5px rgba(116, 167, 255, .12);
 }
 
@@ -110,24 +119,41 @@ body:has(.pcn-search-dropdown) {
   to { opacity: 1; }
 }
 
+@keyframes pc-search-elevate {
+  from {
+    opacity: .88;
+    transform: translateX(-50%) translateY(18px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 720px) {
   .pcn-home:has(.pcn-search-dropdown)::after {
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
+    backdrop-filter: blur(1.5px);
+    -webkit-backdrop-filter: blur(1.5px);
+  }
+
+  .pcn-search-shell:has(.pcn-search-dropdown) {
+    top: max(82px, 14dvh);
+    width: calc(100vw - 24px);
   }
 
   .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown {
     top: calc(100% + 8px);
-    max-height: min(410px, 52dvh);
+    max-height: min(430px, 58dvh);
   }
 
   .pcn-search-shell:has(.pcn-search-dropdown) .pcn-search-dropdown__list {
-    max-height: min(350px, 45dvh);
+    max-height: min(370px, 50dvh);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pcn-home:has(.pcn-search-dropdown)::after {
+  .pcn-home:has(.pcn-search-dropdown)::after,
+  .pcn-search-shell:has(.pcn-search-dropdown) {
     animation: none;
   }
 }
