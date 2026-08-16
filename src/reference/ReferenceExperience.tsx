@@ -16,6 +16,7 @@ import "./ReferenceExperience.css";
 import "./ReferencePages.css";
 import "./ReferencePagesMore.css";
 import "./ReferenceResponsive.css";
+import "./CompactShell.css";
 
 const initialCatalog = buildCatalog();
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -94,14 +95,14 @@ function PublicHeader({ current }: { current?: "home" | "search" | "basket" | "s
   const [menu, setMenu] = useState(false);
   const { count } = useBasket();
   return <header className="ref-header"><div className="ref-shell ref-header__inner"><Brand />
-    <span className="ref-location"><MapPin /> Feijó, AC</span>
+    <span className="ref-location"><MapPin /><span><small>Você está em</small><strong>Feijó, AC</strong></span></span>
     <nav className="ref-nav" aria-label="Navegação principal"><Link className={current === "home" ? "is-active" : ""} to="/">Início</Link><Link className={current === "search" ? "is-active" : ""} to="/buscar">Comparar preços</Link><Link className={current === "stores" ? "is-active" : ""} to="/estabelecimentos">Estabelecimentos</Link><Link className={current === "basket" ? "is-active" : ""} to="/cesta-basica">Lista {count > 0 && <b>{count}</b>}</Link></nav>
     <div className="ref-header__actions"><ThemeButton /><Link to="/favoritos" aria-label="Favoritos"><Heart /></Link><Link className="ref-signin" to="/login">Entrar</Link><button type="button" className="ref-menu" aria-label={menu ? "Fechar menu" : "Abrir menu"} aria-expanded={menu} onClick={() => setMenu(value => !value)}>{menu ? <X /> : <Menu />}</button></div>
   </div>{menu && <nav className="ref-mobile-menu"><Link to="/buscar">Comparar preços</Link><Link to="/estabelecimentos">Estabelecimentos</Link><Link to="/cesta-basica">Lista de compras</Link><Link to="/lojista">Para comerciantes</Link></nav>}</header>;
 }
 
 function PublicFooter() {
-  return <footer className="ref-footer"><div className="ref-shell"><Brand inverse /><p>O preço certo perto de você.</p><nav><Link to="/buscar">Comparar</Link><Link to="/estabelecimentos">Lojas</Link><Link to="/lojista">Para comerciantes</Link><Link to="/fale-conosco">Fale conosco</Link></nav><small>Concepção e desenvolvimento · Franc D&apos;nis</small></div></footer>;
+  return <footer className="ref-footer"><div className="ref-shell ref-footer__inner"><div className="ref-footer__identity"><Brand inverse /><p>O preço certo perto de você.</p></div><nav aria-label="Navegação do rodapé"><Link to="/buscar">Comparar</Link><Link to="/estabelecimentos">Lojas</Link><Link to="/lojista">Comerciantes</Link><Link to="/fale-conosco">Contato</Link></nav><div className="ref-footer__meta"><span><BadgeCheck /> Preços locais verificados</span><small>Concepção e desenvolvimento · Franc D&apos;nis</small></div></div></footer>;
 }
 
 function AppDock({ current }: { current: "home" | "search" | "basket" | "stores" | "profile" }) {
