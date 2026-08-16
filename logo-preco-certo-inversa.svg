@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="320" height="76" viewBox="0 0 320 76" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="76" viewBox="0 0 280 76" role="img" aria-labelledby="title desc">
   <title id="title">PreçoCerto</title>
   <desc id="desc">Carrinho com etiqueta de desconto, símbolo do comparador de preços PreçoCerto</desc>
   <g transform="translate(2 3)">
@@ -13,6 +13,4 @@
   </g>
   <text x="86" y="43" fill="#FFF4E1" font-family="Typeclear, Manrope, Inter, Arial, sans-serif" font-size="35" font-weight="800" letter-spacing="-1.7">Preço</text>
   <text x="183" y="43" fill="#E4A83B" font-family="Typeclear, Manrope, Inter, Arial, sans-serif" font-size="35" font-weight="800" letter-spacing="-1.7">Certo</text>
-  <path d="M88 53h18M294 53h18" stroke="#B85D43" stroke-width="3" stroke-linecap="round"/>
-  <text x="113" y="58" fill="#D8C6B5" font-family="Typeclear, Inter, Arial, sans-serif" font-size="6.8" font-weight="750" letter-spacing=".85">O MELHOR PREÇO, SEMPRE PARA VOCÊ.</text>
 </svg>
