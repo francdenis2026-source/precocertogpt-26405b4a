@@ -1,13 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "@fontsource-variable/inter";
-import "@fontsource-variable/manrope";
 import "@fontsource-variable/outfit";
-import "./index.css";
-import "./styles/GlobalTokenBridge.css";
-import "./styles/GlobalScrollbarRefinement.css";
-import "./styles/AuthCompactProfessional.css";
-import "./styles/PrecoCertoReform2026.css";
+import "./styles/AppReset.css";
 import App from "./App";
 import { startPaymentNotifications } from "./lib/paymentNotifications";
 
