@@ -22,6 +22,7 @@ const clean = (value: string | null | undefined) => {
   return text && text !== "-" && text !== "—" && text.toLocaleLowerCase("pt-BR") !== "não identificada" ? text : "";
 };
 
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const getIdentifier = (href: string) => {
   const match = href.match(/\/produto\/([^/?#]+)/);
   return match ? decodeURIComponent(match[1]) : "";
@@ -35,7 +36,6 @@ export function ProductManufacturerDetails() {
 
   useEffect(() => {
     let active = true;
-    let observer: MutationObserver | null = null;
     let timer = 0;
 
     const scanCards = async () => {
@@ -48,18 +48,18 @@ export function ProductManufacturerDetails() {
         return;
       }
 
-      const ids = elements.map(element => getIdentifier(element.getAttribute("href") || "")).filter(Boolean);
-      const uuidIds = ids.filter(id => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id));
-      const slugIds = ids.filter(id => !uuidIds.includes(id));
+      const ids = Array.from(new Set(elements.map(element => getIdentifier(element.getAttribute("href") || "")).filter(Boolean)));
+      const uuidIds = ids.filter(id => uuidPattern.test(id));
+      const slugIds = ids.filter(id => !uuidPattern.test(id));
       const rows: ProductIdentity[] = [];
 
       if (uuidIds.length) {
-        const response = await supabase.from("products").select("id, slug, brand, manufacturer").in("id", Array.from(new Set(uuidIds)));
-        if (!response.error && response.data) rows.push(...response.data as ProductIdentity[]);
+        const response = await supabase.from("products").select("id, slug, brand").in("id", uuidIds);
+        if (!response.error && response.data) rows.push(...response.data.map(row => ({ ...row, manufacturer: null })) as ProductIdentity[]);
       }
       if (slugIds.length) {
-        const response = await supabase.from("products").select("id, slug, brand, manufacturer").in("slug", Array.from(new Set(slugIds)));
-        if (!response.error && response.data) rows.push(...response.data as ProductIdentity[]);
+        const response = await supabase.from("products").select("id, slug, brand").in("slug", slugIds);
+        if (!response.error && response.data) rows.push(...response.data.map(row => ({ ...row, manufacturer: null })) as ProductIdentity[]);
       }
       if (!active) return;
 
@@ -68,25 +68,25 @@ export function ProductManufacturerDetails() {
         if (row.id) byIdentifier.set(String(row.id), row);
         if (row.slug) byIdentifier.set(String(row.slug), row);
       });
+
       setCards(elements.map(element => {
-        const id = getIdentifier(element.getAttribute("href") || "");
-        const item = byIdentifier.get(id);
+        const item = byIdentifier.get(getIdentifier(element.getAttribute("href") || ""));
         return item ? { element, identity: item } : null;
       }).filter((item): item is CardIdentity => Boolean(item)));
     };
 
     const scheduleScan = () => {
       window.clearTimeout(timer);
-      timer = window.setTimeout(() => { void scanCards(); }, 80);
+      timer = window.setTimeout(() => void scanCards(), 120);
     };
 
     scheduleScan();
-    observer = new MutationObserver(scheduleScan);
+    const observer = new MutationObserver(scheduleScan);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       active = false;
       window.clearTimeout(timer);
-      observer?.disconnect();
+      observer.disconnect();
     };
   }, [location.pathname, location.search]);
 
@@ -100,7 +100,6 @@ export function ProductManufacturerDetails() {
 
     const identifier = decodeURIComponent(match[1]);
     let active = true;
-    let observer: MutationObserver | null = null;
 
     const findTarget = () => {
       const node = document.querySelector<HTMLElement>(".pdp-meta");
@@ -108,27 +107,34 @@ export function ProductManufacturerDetails() {
       return Boolean(node);
     };
 
-    if (!findTarget()) {
-      observer = new MutationObserver(() => {
-        if (findTarget()) observer?.disconnect();
-      });
-      observer.observe(document.body, { childList: true, subtree: true });
-    }
+    findTarget();
+    const observer = new MutationObserver(() => { if (findTarget()) observer.disconnect(); });
+    if (!document.querySelector(".pdp-meta")) observer.observe(document.body, { childList: true, subtree: true });
 
     const load = async () => {
       if (!supabase) return;
-      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(identifier);
-      const query = supabase.from("products").select("id, slug, brand, manufacturer");
-      const response = isUuid
-        ? await query.eq("id", identifier).maybeSingle()
-        : await query.eq("slug", identifier).maybeSingle();
-      if (active && !response.error && response.data) setIdentity(response.data as ProductIdentity);
+      const baseQuery = supabase.from("products").select("id, slug, brand");
+      const brandResponse = uuidPattern.test(identifier)
+        ? await baseQuery.eq("id", identifier).maybeSingle()
+        : await baseQuery.eq("slug", identifier).maybeSingle();
+      if (!active || brandResponse.error || !brandResponse.data) return;
+
+      const base: ProductIdentity = { ...(brandResponse.data as any), manufacturer: null };
+      setIdentity(base);
+
+      const manufacturerQuery = supabase.from("products").select("manufacturer");
+      const manufacturerResponse = uuidPattern.test(identifier)
+        ? await manufacturerQuery.eq("id", identifier).maybeSingle()
+        : await manufacturerQuery.eq("slug", identifier).maybeSingle();
+      if (active && !manufacturerResponse.error && manufacturerResponse.data) {
+        setIdentity({ ...base, manufacturer: (manufacturerResponse.data as any).manufacturer || null });
+      }
     };
 
     void load();
     return () => {
       active = false;
-      observer?.disconnect();
+      observer.disconnect();
     };
   }, [location.pathname]);
 
